@@ -58,8 +58,7 @@ def root_create_empresa(request):
     else:
         form_empresa = EmpresaForm()
         form_owner = UsuarioCreationForm()
-        # Pre-configurando el rol del owner en el formulario para que sea read-only
-        form_owner.fields['rol'].initial = 'OWNER'
+
         
     context = {
         'form_empresa': form_empresa,
