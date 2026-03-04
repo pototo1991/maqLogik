@@ -83,7 +83,7 @@ class MaquinariaForm(forms.ModelForm):
 class UsuarioCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = Usuario
-        fields = ('username', 'rut', 'nombre_completo', 'email', 'telefono', 'rol', 'estado', 'valor_hora')
+        fields = ('username', 'rut', 'nombre_completo', 'email', 'telefono', 'valor_hora')
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: admin.empresa'}),
             'rut': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: 12345678-9', 'pattern': '^[0-9]{7,8}-[0-9Kk]{1}$', 'title': 'Formato con guión: 12345678-9'}),
