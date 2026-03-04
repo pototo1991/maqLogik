@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('', views.web_login, name='home'),  # Redirección raíz al login
     path('login/', views.web_login, name='web_login'),
     path('logout/', views.web_logout, name='web_logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
