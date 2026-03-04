@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Historial Clínico (Taller)</title>
+    <style>
+        {% include "gestion/reportes_pdf_inline.css" %}
+    </style>
+</head>
+<body class="pdf-historial">
+
+    <div id="header_content">
+        <div style="float: left; font-weight: bold; color: #ea580c; font-size: 14px;">MaqLogik SaaS</div>
+        <div style="float: right; color: #64748b;">Mantenimiento y Taller</div>
+    </div>
+
+    <div id="footer_content">
+        Impreso el: {{ fecha_generacion }} | Página <pdf:pagenumber> de <pdf:pagecount>
+    </div>
+
+    <!-- CUERPO PRINCIPAL -->
+    <h1>Historial Clínico de Mantenimiento</h1>
+    <div class="empresa-info">
+        <strong>Empresa:</strong> {{ empresa.nombre_fantasia }} | <strong>RUT:</strong> {{ empresa.rut_empresa }}
+    </div>
+    
+    <div class="machine-card">
+        <div class="machine-title">Máquina: {{ maquina.id_interno }}</div>
+        <table style="width: 100%; border: none;">
+            <tr>
+                <td style="border: none;"><strong>Tipo/Marca:</strong> {{ maquina.tipo|default:"General" }}</td>
+                <td style="border: none;"><strong>Medida Actual:</strong> {{ maquina.valor_actual_medida }} {{ maquina.get_unidad_medida_display }}</td>
+                <td style="border: none;"><strong>Próx. Mantenimiento:</strong> {{ maquina.proximo_mantenimiento }}</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="filtros-aplicados">
+        <strong>Periodo Auditado:</strong> {{ fecha_inicio }} - {{ fecha_fin }}<br>
+        <strong>Generado por:</strong> {{ usuario.get_full_name|default:usuario.username }}
+    </div>
+
+    {% if historial %}
+        {% for ot in historial %}
+        <div class="intervention-box">
+            <div class="intervention-header">
+                OT Taller #{{ ot.id }} | 
+                <span style="color: #c2410c;">{{ ot.get_tipo_mantenimiento_display }}</span> | 
+                Egreso: {{ ot.fecha_salida|date:"d/m/Y H:i" }}
+            </div>
+            <div class="intervention-body">
+                <table class="detail-table">
+                    <tr>
+                        <td class="label">Mecánico a cargo:</td>
+                        <td class="value">
+                            {% if ot.mecanico %}
+                                {{ ot.mecanico.get_full_name|default:ot.mecanico.username }}
+                            {% else %}
+                                Sin Asignar
+                            {% endif %}
+                        </td>
+                        <td class="label">Costo Repuestos/MO:</td>
+                        <td class="value">${{ ot.costo_total }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Medida de Ingreso:</td>
+                        <td class="value">{{ ot.medida_ingreso }}</td>
+                        <td class="label">Medida de Egreso:</td>
+                        <td class="value">{{ ot.medida_salida|default:"-" }}</td>
+                    </tr>
+                </table>
+                <br>
+                <strong>Motivo de Falla / Ingreso:</strong>
+                <div style="padding: 5px; background: #f8fafc; border-left: 3px solid #f97316; margin-bottom: 10px;">
+                    {{ ot.descripcion_falla }}
+                </div>
+                
+                <strong>Trabajos Efectuados y Repuestos:</strong>
+                <div style="padding: 5px; background: #f8fafc; border-left: 3px solid #10b981;">
+                    {{ ot.trabajo_realizado|default:"Sin detalles." }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p style="color: #64748b; font-style: italic; text-align: center; margin-top: 50px;">
+            La máquina {{ maquina.id_interno }} no registra historial de taller cerrado en el periodo seleccionado.
+        </p>
+    {% endif %}
+
+</body>
+</html>

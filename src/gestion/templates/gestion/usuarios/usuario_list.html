@@ -1,0 +1,62 @@
+{% extends 'gestion/base.html' %}
+{% load static sort_tags %}
+{% load static %}
+
+{% block title %}Usuarios{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'gestion/css/forms.css' %}">
+<link rel="stylesheet" href="{% static 'gestion/css/usuarios.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="header-actions">
+    <h1 style="color: white; margin: 0;">Gestión de Usuarios</h1>
+    <a href="{% url 'usuario_create' %}" class="btn-neon">+ Nuevo Usuario</a>
+</div>
+
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="white-space: nowrap;"><a href="{% sort_url 'username' current_sort current_dir %}" style="color: inherit; text-decoration: none;">Usuario{% sort_icon 'username' current_sort current_dir %}</a></th>
+                <th style="white-space: nowrap;"><a href="{% sort_url 'nombre_completo' current_sort current_dir %}" style="color: inherit; text-decoration: none;">Nombre{% sort_icon 'nombre_completo' current_sort current_dir %}</a></th>
+                <th style="white-space: nowrap;"><a href="{% sort_url 'rol' current_sort current_dir %}" style="color: inherit; text-decoration: none;">Rol{% sort_icon 'rol' current_sort current_dir %}</a></th>
+                <th style="white-space: nowrap;"><a href="{% sort_url 'estado' current_sort current_dir %}" style="color: inherit; text-decoration: none;">Estado{% sort_icon 'estado' current_sort current_dir %}</a></th>
+                <th style="white-space: nowrap;"><a href="{% sort_url 'rut' current_sort current_dir %}" style="color: inherit; text-decoration: none;">Rut{% sort_icon 'rut' current_sort current_dir %}</a></th>
+                <th style="white-space: nowrap;">Teléfono</th>
+                <th style="white-space: nowrap;"><a href="{% sort_url 'valor_hora' current_sort current_dir %}" style="color: inherit; text-decoration: none;">Valor Hora{% sort_icon 'valor_hora' current_sort current_dir %}</a></th>
+                <th style="white-space: nowrap;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in usuarios %}
+            <tr>
+                <td>{{ u.username }}</td>
+                <td>{{ u.nombre_completo }}</td>
+                <td><span style="padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; background: rgba(59, 130, 246, 0.2); color: #60a5fa;">{{ u.get_rol_display }}</span></td>
+                <td>
+                    <span style="padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; 
+                        {% if u.estado == 'DISPONIBLE' %}background: rgba(0, 230, 118, 0.2); color: #00E676;
+                        {% elif u.estado == 'LICENCIA' %}background: rgba(255, 193, 7, 0.2); color: #FFC107;
+                        {% elif u.estado == 'VACACIONES' %}background: rgba(33, 150, 243, 0.2); color: #2196F3;
+                        {% else %}background: rgba(255, 61, 0, 0.2); color: #FF3D00;{% endif %}">
+                        {{ u.get_estado_display }}
+                    </span>
+                </td>
+                <td>{{ u.rut }}</td>
+                <td>{{ u.telefono }}</td>
+                <td>${{ u.valor_hora }}</td>
+                <td>
+                    <a href="{% url 'usuario_update' u.id %}" class="btn-icon">✏️ Editar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 30px; color: #9ca3af;">No hay usuarios registrados asociados a tu empresa.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends 'gestion/base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'gestion/css/forms.css' %}">
+<link rel="stylesheet" href="{% static 'gestion/css/usuarios.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="glass-form-box">
+        <div class="form-header">
+            <h2>{{ titulo }}</h2>
+        </div>
+        
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 15px; margin-bottom: 20px; border-radius: 4px; color: #fca5a5;">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                {% for field in form %}
+                <div class="form-group {% if field.name == 'nombre_completo' or field.name == 'valor_hora' %}full-width{% endif %}" {% if field.name == 'password' or field.name == 'password_confirmation' or field.name == 'password1' or field.name == 'password2' %}style="grid-column: span 1;"{% endif %}>
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <div class="help-text">{{ field.help_text|safe }}</div>
+                    {% endif %}
+                    {% if field.errors %}
+                        <ul class="error-list">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'usuario_list' %}" class="btn-cancel">Cancelar</a>
+                <button type="submit" class="btn-submit">{{ btn_texto }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'gestion/js/usuarios.js' %}?v=1.0"></script>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'gestion/base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'gestion/css/forms.css' %}">
+<link rel="stylesheet" href="{% static 'gestion/css/ordenes.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="glass-form-box">
+        <div class="form-header">
+            <h2>{{ titulo }}</h2>
+            {% if is_cierre %}
+                <p style="color: #9ca3af; font-size: 0.9rem;">
+                    Patente: <strong style="color: white;">{{ orden.maquina.patente|default:"N/A" }}</strong> | 
+                    Iniciado con: <strong style="color: #10b981;">{{ orden.medida_salida }} {{ orden.maquina.get_unidad_medida_display }}</strong>
+                </p>
+                <div class="info-box">
+                    Ingrese la lectura final del horómetro (o km) para cerrar la orden y dejar la máquina como DISPONIBLE.
+                </div>
+            {% else %}
+                <div class="info-box">
+                    <strong>Atención:</strong> Para abrir una OT, la máquina seleccionada debe contar con un <strong>Checklist válido realizado hace menos de 12 horas</strong>.
+                </div>
+            {% endif %}
+        </div>
+        
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="alert-box">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <ul class="error-list">
+                    {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <div class="form-actions">
+                <a href="{% url 'orden_list' %}" class="btn-cancel">Cancelar</a>
+                <button type="submit" class="btn-submit {% if is_cierre %}btn-warning{% endif %}">
+                    {{ btn_texto }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ operadores_map|json_script:"operadores-map-data" }}
+{{ medidas_map|json_script:"medidas-map-data" }}
+<script src="{% static 'gestion/js/ordenes.js' %}?v=1.1"></script>
+{% endblock %}

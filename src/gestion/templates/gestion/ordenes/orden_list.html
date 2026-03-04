@@ -1,0 +1,157 @@
+{% extends 'gestion/base.html' %}
+{% load static sort_tags %}
+
+{% block title %}Órdenes de Trabajo{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'gestion/css/forms.css' %}">
+<link rel="stylesheet" href="{% static 'gestion/css/ordenes.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="header-actions">
+    <h1 style="color: white; margin: 0;">Órdenes de Trabajo (Actividad)</h1>
+    <a href="{% url 'orden_create' %}" class="btn-neon">+ Nueva Salida (Abrir OT)</a>
+</div>
+
+<!-- ==========================================
+     ALARMAS OPERATIVAS (USO FUERA DE TURNO)
+     ========================================== -->
+{% if alertas_madrugadores or alertas_rezagados %}
+<div class="alerts-section" style="border: 1px solid #f97316; background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 25px; box-shadow: 0 0 20px rgba(249, 115, 22, 0.1) inset; margin-bottom: 30px;">
+    <div class="section-header" style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;">
+        <h3 class="section-title" style="color: #fdba74; margin: 0; font-size: 1.25rem;">
+            <i class="icon">⏰</i> Alertas de Horario Operativo
+        </h3>
+        <span style="color: #9ca3af; font-size: 0.85rem; margin-left: auto;">Patrón Base: 08:00 hrs a 19:00 hrs</span>
+    </div>
+
+    <!-- 1. MADRUGADORES (< 08:00 AM) -->
+    {% if alertas_madrugadores %}
+    <h4 style="color: #fbbf24; margin-bottom: 15px;">Salidas Irregulares (Antes de las 08:00 AM)</h4>
+    <div class="table-container" style="border-left: 4px solid #fbbf24; margin-bottom: 25px;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Máquina</th>
+                    <th>Operador asignado</th>
+                    <th>Despachado Por</th>
+                    <th>Hora de Salida</th>
+                    <th>Estado de OT</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ot in alertas_madrugadores %}
+                <tr>
+                    <td><strong>{{ ot.maquina.id_interno }}</strong> - {{ ot.maquina.patente|default:"N/A" }}</td>
+                    <td>{{ ot.operador.get_full_name|default:ot.operador.username }}</td>
+                    <td>{{ ot.despachador.username|default:"Auto-Despacho" }}</td>
+                    <td style="color: #fca5a5; font-weight: bold;">{{ ot.fecha_salida|date:"H:i" }} hrs ({{ ot.fecha_salida|date:"d M" }})</td>
+                    <td>
+                        <a href="{% url 'orden_close' ot.id %}" style="color: #3b82f6; text-decoration: none; font-size: 0.9rem;">Cerrar OT ➔</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- 2. REZAGADOS (Noches > 19:00 PM) -->
+    {% if alertas_rezagados %}
+    <h4 style="color: #ef4444; margin-bottom: 15px;">Retornos Pendientes (Horario Fuera de Rango: Actual {{ hora_actual_servidor }}:00)</h4>
+    <div class="table-container" style="border-left: 4px solid #ef4444;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Máquina</th>
+                    <th>Operador a cargo</th>
+                    <th>Retraso Desde (Salida)</th>
+                    <th>Alerta</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ot in alertas_rezagados %}
+                <tr>
+                    <td><strong>{{ ot.maquina.id_interno }}</strong> - {{ ot.maquina.patente|default:"N/A" }}</td>
+                    <td>{{ ot.operador.get_full_name|default:ot.operador.username }}</td>
+                    <td>{{ ot.fecha_salida|date:"d M - H:i" }} hrs</td>
+                    <td>
+                        <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5;">MÁQUINA NO HA VUELTO</span>
+                    </td>
+                    <td>
+                        <a href="{% url 'orden_close' ot.id %}" style="color: #ef4444; font-weight: bold; text-decoration: none; font-size: 0.9rem;">Cerrar OT ➔</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+</div>
+{% endif %}
+
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="white-space: nowrap;"><a href="{% sort_url 'fecha_salida' current_sort current_dir %}" style="color: inherit; text-decoration: none;">Estado / Fecha{% sort_icon 'fecha_salida' current_sort current_dir %}</a></th>
+                <th style="white-space: nowrap;"><a href="{% sort_url 'maquina__id_interno' current_sort current_dir %}" style="color: inherit; text-decoration: none;">Máquina{% sort_icon 'maquina__id_interno' current_sort current_dir %}</a></th>
+                <th style="white-space: nowrap;"><a href="{% sort_url 'operador__username' current_sort current_dir %}" style="color: inherit; text-decoration: none;">Operador{% sort_icon 'operador__username' current_sort current_dir %}</a></th>
+                <th style="white-space: nowrap;"><a href="{% sort_url 'nro_guia_despacho' current_sort current_dir %}" style="color: inherit; text-decoration: none;">N° Guía{% sort_icon 'nro_guia_despacho' current_sort current_dir %}</a></th>
+                <th style="white-space: nowrap;"><a href="{% sort_url 'medida_salida' current_sort current_dir %}" style="color: inherit; text-decoration: none;">Salida (Horas/Km){% sort_icon 'medida_salida' current_sort current_dir %}</a></th>
+                <th style="white-space: nowrap;">Llegada (Horas/Km)</th>
+                <th style="white-space: nowrap;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for o in ordenes %}
+            <tr>
+                <td>
+                    {% if o.fecha_entrada %}
+                        <span class="badge info">✓ Finalizada</span>
+                        <div class="text-dim mt-1">{{ o.fecha_salida|date:"H:i" }} a {{ o.fecha_entrada|date:"H:i" }}</div>
+                    {% else %}
+                        <span class="badge warning">⚠️ En Ruta</span>
+                        <div class="text-dim mt-1">Salió {{ o.fecha_salida|timesince }}</div>
+                    {% endif %}
+                </td>
+                <td style="font-weight: 500;">
+                    {{ o.maquina.id_interno|default:"SN" }}
+                    <div class="text-dim">{{ o.maquina.patente|default:"Sin Patente" }}</div>
+                </td>
+                <td>{{ o.operador.get_full_name|default:o.operador.username }}</td>
+                <td>{{ o.nro_guia_despacho }}</td>
+                
+                <td>{{ o.medida_salida }} {{ o.maquina.get_unidad_medida_display }}</td>
+                
+                <td>
+                    {% if o.fecha_entrada %}
+                        {{ o.medida_entrada }} {{ o.maquina.get_unidad_medida_display }}
+                        <div style="font-size: 0.8rem; color:#34d399;">+{{ o.medida_entrada|add:"-"|add:o.medida_salida }} dif</div>
+                    {% else %}
+                        <span class="text-dim">-</span>
+                    {% endif %}
+                </td>
+                
+                <td>
+                    {% if not o.fecha_entrada %}
+                        <a href="{% url 'orden_close' o.id %}" class="btn-cerrar">Cerrar OT</a>
+                    {% else %}
+                        <span class="text-dim">Completada</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 30px; color: #9ca3af;">
+                    No existen Órdenes de Trabajo registradas en este período.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

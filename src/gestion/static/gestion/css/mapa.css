@@ -1,0 +1,130 @@
+/* =========================================================================
+   MaqLogik - Estilos del Módulo Tracking GPS
+   ========================================================================= */
+
+.map-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+    height: calc(100vh - 120px); /* Ocupar casi toda la pantalla restando navbars */
+}
+
+.map-sidebar {
+    background: rgba(17, 24, 39, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 15px;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.map-sidebar h3 {
+    color: #e5e7eb;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.machine-item {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.machine-item:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.machine-item .id-interno {
+    font-weight: bold;
+    color: #3b82f6;
+    margin-bottom: 4px;
+}
+
+.machine-item .info {
+    font-size: 0.85rem;
+    color: #9ca3af;
+}
+
+.map-container {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+    background-color: #0f172a; /* Fallback oscuro */
+}
+
+/* Redefiniendo las clases de Leaflet */
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+    background: rgba(17, 24, 39, 0.9) !important;
+    backdrop-filter: blur(8px);
+    color: white !important;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.leaflet-popup-content {
+    margin: 15px;
+    line-height: 1.5;
+}
+
+.popup-title {
+    font-weight: bold;
+    color: #10b981;
+    font-size: 1.1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 5px;
+    margin-bottom: 8px;
+}
+
+.popup-data {
+    font-size: 0.9rem;
+    color: #e5e7eb;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+.status-active { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+.status-idle { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+
+/* Custom marker pulsante  */
+.pulse-marker {
+    background: #10b981;
+    border-radius: 50%;
+    width: 15px;
+    height: 15px;
+    box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
+    animation: pulse 2s infinite;
+}
+
+.pulse-marker.idle {
+    background: #ef4444;
+    box-shadow: 0 0 0 rgba(239, 68, 68, 0.4);
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}

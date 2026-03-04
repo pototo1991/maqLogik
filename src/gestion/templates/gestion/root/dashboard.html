@@ -1,0 +1,125 @@
+{% extends 'gestion/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'gestion/css/root.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="header" style="justify-content: space-between;">
+    <div class="header-info">
+        <h1 class="page-title">Panel de Administración Maestro (SaaS)</h1>
+        <div class="date-display">{{ total_empresas }} Clientes Activos Globales</div>
+    </div>
+    <div class="user-profile" style="margin-right: 20px;">
+        <div class="user-avatar" style="background: linear-gradient(135deg, #10b981, #047857);">ADMIN</div>
+        <div class="user-info">
+            <span class="user-name">{{ request.user.get_full_name|default:request.user.username }}</span>
+            <span class="user-role">Superusuario MaqLogik</span>
+        </div>
+    </div>
+</div>
+
+<div class="machines-grid">
+    {% for empresa in empresas %}
+    <div class="machine-card hover-lift" style="border-top: 4px solid var(--accent, #3b82f6);">
+        <div class="machine-header">
+            <div class="machine-id machine-id-large">{{ empresa.nombre_fantasia }}</div>
+            <span class="status-badge status-disponible status-rut">RUT: {{ empresa.rut_empresa }}</span>
+        </div>
+        
+        <div class="machine-stats">
+            <div class="stat-item">
+                <span class="stat-label">Usuarios Creados</span>
+                <!-- Accediendo inversamente a los usuarios de la empresa -->
+                <span class="stat-value">{{ empresa.usuario_set.count }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Maquinarias</span>
+                <span class="stat-value">{{ empresa.maquinaria_set.count }}</span>
+            </div>
+        </div>
+        
+        <h3 class="module-list-title">Módulos Contratados</h3>
+        <ul class="module-grid-list">
+            
+            <li class="module-item">
+                {% if empresa.modulo_checklist %}
+                <span class="icon-ok">✅</span>
+                {% else %}
+                <span class="icon-error">❌</span>
+                {% endif %}
+                Checklists
+            </li>
+
+            <li class="module-item">
+                {% if empresa.modulo_mantencion %}
+                <span class="icon-ok">✅</span>
+                {% else %}
+                <span class="icon-error">❌</span>
+                {% endif %}
+                Taller
+            </li>
+
+            <li class="module-item">
+                {% if empresa.modulo_combustible %}
+                <span class="icon-ok">✅</span>
+                {% else %}
+                <span class="icon-error">❌</span>
+                {% endif %}
+                Combustible
+            </li>
+
+            <li class="module-item">
+                {% if empresa.modulo_gps %}
+                <span class="icon-ok">✅</span>
+                {% else %}
+                <span class="icon-error">❌</span>
+                {% endif %}
+                Tracking GPS
+            </li>
+            
+            <li class="module-item-full">
+                {% if empresa.modulo_reporteria %}
+                <span class="icon-ok">✅</span>
+                {% else %}
+                <span class="icon-error">❌</span>
+                {% endif %}
+                Reportería PDF
+            </li>
+        </ul>
+
+        <hr class="hr-divider">
+        <hr class="hr-divider">
+        <div class="btn-group-3">
+            <a href="{% url 'root_impersonate' empresa.id %}" class="btn-card-action" style="border: 1px solid var(--accent); color: var(--accent);">
+                <i class="icon">👁️</i>
+                <span>Ver como<br>Cliente</span>
+            </a>
+            <a href="{% url 'root_edit_modules' empresa.id %}" class="btn-card-action btn-card-primary">
+                <i class="icon">⚙️</i>
+                <span>Módulos<br>SaaS</span>
+            </a>
+            <a href="{% url 'root_manage_owner' empresa.id %}" class="btn-card-action btn-card-secondary">
+                <i class="icon">👥</i>
+                <span>Dueño<br>Owner</span>
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-state empty-state-card">
+        <div class="empty-icon empty-state-icon">🏢</div>
+        <h2>Sin Empresas Activas</h2>
+        <p class="text-secondary">Aún no has registrado clientes en la plataforma MaqLogik.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Botón Agregar Empresa (Outline Neon Style) -->
+<div class="action-container">
+    <a href="{% url 'root_create_empresa' %}" class="btn-outline-neon" title="Registrar Nueva Empresa">
+        <i class="icon">+</i> Registrar Equipo
+    </a>
+</div>
+
+{% endblock %}

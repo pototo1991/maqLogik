@@ -1,0 +1,156 @@
+.login-body {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+    /* Fondo abstracto radial */
+    background: radial-gradient(circle at top right, rgba(0, 230, 118, 0.15), transparent 40%),
+                radial-gradient(circle at bottom left, rgba(21, 26, 35, 1), #0B0E14 60%);
+}
+
+.login-container {
+    display: flex;
+    width: 1000px;
+    height: 600px;
+    z-index: 10;
+}
+
+/* Tarjeta de Formulario */
+.login-card {
+    flex: 1;
+    padding: 60px 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+}
+
+.login-header h2 {
+    font-size: 2rem;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+}
+
+.login-header h2 span {
+    color: var(--color-brand);
+}
+
+.login-header p {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 40px;
+}
+
+/* Formulario */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    color: #fff;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--color-brand);
+    background: rgba(0, 230, 118, 0.05);
+}
+
+.login-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    font-size: 0.85rem;
+}
+
+.remember-me input {
+    margin-right: 6px;
+    accent-color: var(--color-brand);
+}
+
+.forgot-pwd {
+    color: var(--color-brand);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.forgot-pwd:hover {
+    color: var(--color-brand-hover);
+    text-decoration: underline;
+}
+
+/* Arte Lateral */
+.login-art {
+    flex: 1;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(21, 26, 35, 0.9) 100%),
+                url('https://images.unsplash.com/photo-1541887340244-a14af7da4b7a?auto=format&fit=crop&q=80') center/cover;
+    border-top-right-radius: var(--radius-lg);
+    border-bottom-right-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+}
+
+.art-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    background: rgba(11, 14, 20, 0.7);
+    padding: 30px;
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(10px);
+}
+
+.art-content h3 {
+    font-size: 1.8rem;
+    margin-bottom: 12px;
+    color: #fff;
+}
+
+.art-content p {
+    color: var(--color-text-muted);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* Responsive mínimo */
+@media (max-width: 900px) {
+    .login-container {
+        width: 100%;
+        height: auto;
+        min-height: 100vh;
+        flex-direction: column;
+    }
+    .login-card {
+        border-radius: 0;
+        border: none;
+        padding: 40px 20px;
+    }
+    .login-art {
+        display: none;
+    }
+}

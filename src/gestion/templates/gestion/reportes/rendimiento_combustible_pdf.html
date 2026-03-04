@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Reporte de Combustible</title>
+    <style>
+        {% include "gestion/reportes_pdf_inline.css" %}
+    </style>
+</head>
+<body class="pdf-combustible">
+
+    <div id="header_content">
+        <div style="float: left; font-weight: bold; color: #10b981; font-size: 14px;">MaqLogik SaaS</div>
+        <div style="float: right; color: #64748b;">Reporte de Consumo Termo-dinámico</div>
+    </div>
+
+    <div id="footer_content">
+        Impreso el: {{ fecha_generacion }} | Página <pdf:pagenumber> de <pdf:pagecount>
+    </div>
+
+    <!-- CUERPO PRINCIPAL -->
+    <h1>Control y Rendimiento de Combustible</h1>
+    <div class="empresa-info">
+        <strong>Empresa:</strong> {{ empresa.nombre_fantasia }} | <strong>RUT:</strong> {{ empresa.rut_empresa }}
+    </div>
+    
+    <div class="filtros-aplicados">
+        <strong>Periodo de Evaluación:</strong> {{ fecha_inicio }} - {{ fecha_fin }}<br>
+        <strong>Generado por:</strong> {{ usuario.get_full_name|default:usuario.username }}
+    </div>
+
+    <h2>Resumen Ejecutivo de Gastos del Periodo</h2>
+    <table class="metric-cards">
+        <tr>
+            <td>
+                Total Litros Abastecidos<br>
+                <div class="metric-num">{{ total_litros }} Lts</div>
+            </td>
+            <td>
+                Inversión / Costo Periodo<br>
+                <div class="metric-num">${{ total_costo }}</div>
+            </td>
+        </tr>
+    </table>
+
+    <br> <!-- Salto de Línea -->
+
+    <h2>1. Consumo Acumulado por Máquina (Ranking)</h2>
+    {% if resumen_maquinas %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Máquina / Vehículo</th>
+                <th>Familia</th>
+                <th>Veces Abastecida</th>
+                <th>Litros Consumidos</th>
+                <th>Gasto Imp. ($)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rm in resumen_maquinas %}
+            <tr>
+                <td><strong>{{ rm.maquina__id_interno }}</strong></td>
+                <td>{{ rm.maquina__tipo|default:"General" }}</td>
+                <td class="text-center">{{ rm.numero_cargas }} Vzs</td>
+                <td class="text-right" style="font-weight: bold; color: #047857;">{{ rm.total_litros }} L</td>
+                <td class="text-right">${{ rm.total_costo }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: #64748b; font-style: italic;">No hay registro de actividad de surtidores para las fechas auditas.</p>
+    {% endif %}
+
+    <h2>2. Bitácora Detallada de Surtidor</h2>
+    {% if recargas %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Fecha Carga</th>
+                <th>Fuente</th>
+                <th>Máquina</th>
+                <th>Operador/Despachador</th>
+                <th>Cant. Litros</th>
+                <th>Total Bruto ($)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in recargas %}
+            <tr>
+                <td>{{ log.fecha_carga|date:"d/m/Y H:i" }}</td>
+                <td style="font-size: 10px;">{{ log.get_tipo_carga_display }}</td>
+                <td>{{ log.maquina.id_interno }}</td>
+                <td>{{ log.operador.get_full_name|default:log.operador.username }}</td>
+                <td class="text-right" style="font-weight: bold;">{{ log.litros }} L</td>
+                <td class="text-right">${{ log.costo_total }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+</body>
+</html>

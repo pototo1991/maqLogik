@@ -1,0 +1,43 @@
+{% extends 'gestion/base.html' %}
+{% load static %}
+
+{% block title %}Tracking GPS en Vivo{% endblock %}
+
+{% block extra_css %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<link rel="stylesheet" href="{% static 'gestion/css/mapa.css' %}">
+{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+    <h1 style="color: white; margin: 0;">🛰️ Tracking GPS (Live)</h1>
+    <div style="color: #9ca3af; font-size: 0.9rem;">
+        Actualizando automáticamente cada <span style="color: #3b82f6; font-weight: bold;">5s</span>
+    </div>
+</div>
+
+<div class="map-layout">
+    <div class="map-sidebar">
+        <h3>Lista de Maquinarias</h3>
+        <div id="machine-list-content">
+            <div class="loading-state" style="color: #9ca3af; font-size: 0.9rem; text-align: center; margin-top: 20px;">
+                Cargando datos GPS...
+            </div>
+        </div>
+    </div>
+    
+    <div class="map-container">
+        <div id="map"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Div contenedor oculto para pasar variables de Django al JS externo -->
+<div id="map-data-container" data-api-url="{% url 'api_posiciones' %}" style="display: none;"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="{% static 'gestion/js/mapa.js' %}"></script>
+{% endblock %}

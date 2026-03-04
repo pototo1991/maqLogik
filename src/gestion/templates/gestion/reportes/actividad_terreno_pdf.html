@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Reporte de Actividad en Terreno</title>
+    <style>
+        {% include "gestion/reportes_pdf_inline.css" %}
+    </style>
+</head>
+<body class="pdf-terreno">
+
+    <!-- Header Repetitivo para todas las páginas -->
+    <div id="header_content">
+        <div style="float: left; font-weight: bold; color: #1e3a8a; font-size: 14px;">MaqLogik SaaS</div>
+        <div style="float: right; color: #64748b;">Reporte de Actividad</div>
+    </div>
+
+    <!-- Fotter Repetitivo -->
+    <div id="footer_content">
+        Impreso el: {{ fecha_generacion }} | Página <pdf:pagenumber> de <pdf:pagecount>
+    </div>
+
+    <!-- CUERPO PRINCIPAL -->
+    <h1>Reporte Consolidado de Terreno</h1>
+    <div class="empresa-info">
+        <strong>Empresa:</strong> {{ empresa.nombre_fantasia }} | <strong>RUT:</strong> {{ empresa.rut_empresa }}
+    </div>
+    
+    <div class="filtros-aplicados">
+        <strong>Rango de Evaluación:</strong> Desde el {{ fecha_inicio }} Hasta el {{ fecha_fin }}<br>
+        <strong>Generado por:</strong> {{ usuario.get_full_name|default:usuario.username }}
+    </div>
+
+    <h2>1. Órdenes de Trabajo (Salidas Completadas)</h2>
+    {% if ordenes %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Máquina</th>
+                <th>Operador</th>
+                <th>Guía N°</th>
+                <th>Salida (Medida)</th>
+                <th>Retorno (Medida)</th>
+                <th>Fecha Salida</th>
+                <th>Fecha Retorno</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ot in ordenes %}
+            <tr>
+                <td>{{ ot.id }}</td>
+                <td>{{ ot.maquina.id_interno }}</td>
+                <td>{{ ot.operador.get_full_name|default:ot.operador.username }}</td>
+                <td class="text-center">{{ ot.nro_guia_despacho }}</td>
+                <td class="text-right">{{ ot.medida_salida }}</td>
+                <td class="text-right">{{ ot.medida_entrada|default:"-" }}</td>
+                <td>{{ ot.fecha_salida|date:"d/m/Y H:i" }}</td>
+                <td>{{ ot.fecha_entrada|date:"d/m/Y H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: #64748b; font-style: italic;">No se registraron Órdenes de Trabajo finalizadas en este periodo.</p>
+    {% endif %}
+
+    <h2>2. Auditoría de Checklists (Inspección Diaria)</h2>
+    {% if checklists %}
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Máquina Operada</th>
+                <th>Operador Responsable</th>
+                <th>Niveles</th>
+                <th>Ópticas</th>
+                <th>Estructura</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for chk in checklists %}
+            <tr>
+                <td>{{ chk.fecha_revision|date:"d/m/Y" }}</td>
+                <td>{{ chk.maquina.id_interno }}</td>
+                <td>{{ chk.usuario.get_full_name|default:chk.usuario.username }}</td>
+                <td class="text-center {% if chk.niveles_ok %}status-ok{% else %}status-bad{% endif %}">
+                    {% if chk.niveles_ok %}Limpio{% else %}Falla{% endif %}
+                </td>
+                <td class="text-center {% if chk.luces_ok %}status-ok{% else %}status-bad{% endif %}">
+                    {% if chk.luces_ok %}Limpio{% else %}Falla{% endif %}
+                </td>
+                <td class="text-center {% if chk.estructura_ok %}status-ok{% else %}status-bad{% endif %}">
+                    {% if chk.estructura_ok %}Limpio{% else %}Falla{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: #64748b; font-style: italic;">No se reportaron Checklists operacionales en este periodo.</p>
+    {% endif %}
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: maqlogik_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: maqlogik_db
+      MYSQL_ROOT_PASSWORD: password_secreto
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword_secreto"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  web:
+    build: .
+    container_name: maqlogik_web
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./src:/code
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  redis:
+    image: redis:7-alpine
+    container_name: maqlogik_redis
+    ports:
+      - "6379:6379"
+
+  celery:
+    build: .
+    container_name: maqlogik_celery
+    command: celery -A config worker -l info
+    volumes:
+      - ./src:/code
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  celery-beat:
+    build: .
+    container_name: maqlogik_celery_beat
+    command: celery -A config beat -l info
+    volumes:
+      - ./src:/code
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+volumes:
+  db_data:

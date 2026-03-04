@@ -1,0 +1,87 @@
+{% extends 'gestion/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'gestion/css/taller.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h1>⚙️ {{ titulo }}</h1>
+        <p>Registre el ingreso de un equipo al taller mecánico.</p>
+    </div>
+
+    <!-- Contenedor Principal Izq/Der -->
+    <div class="form-body flex-row">
+        <!-- Columna Izquierda: Formulario V2 -->
+        <div class="form-main-column">
+            <form action="{% url 'taller_create_ot' %}" method="post" class="neon-form" id="tallerForm">
+                {% csrf_token %}
+                
+                <!-- 1. IDENTIFICACIÓN -->
+                <div class="form-section">
+                    <h3 class="section-title"><span class="icon">🚜</span> Equipo y Diagnóstico General</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="{{ form.maquina.id_for_label }}">Máquina Ingresando *</label>
+                            {{ form.maquina }}
+                            {{ form.maquina.errors }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.tipo_mantenimiento.id_for_label }}">Tipo de Mantenimiento *</label>
+                            {{ form.tipo_mantenimiento }}
+                            {{ form.tipo_mantenimiento.errors }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. MEDIDAS Y MOTIVOS -->
+                <div class="form-section">
+                    <h3 class="section-title"><span class="icon">⏱️</span> Medidas y Falla Reportada</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="{{ form.medida_ingreso.id_for_label }}">Horómetro/Km al Ingresar *</label>
+                            {{ form.medida_ingreso }}
+                            <small class="help-text">El sistema recordará esta cifra para calcular su desgaste final.</small>
+                            {{ form.medida_ingreso.errors }}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full-width" style="margin-top: 15px;">
+                        <label for="{{ form.descripcion_falla.id_for_label }}">Motivo de Ingreso o Falla Reportada *</label>
+                        {{ form.descripcion_falla }}
+                        {{ form.descripcion_falla.errors }}
+                    </div>
+                </div>
+
+                {% if form.non_field_errors %}
+                <div class="form-errors alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">{{ btn_texto }}</button>
+                    <a href="{% url 'taller_dashboard' %}" class="btn-cancel">Cancelar</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Columna Derecha: Panel de Alertas/Información -->
+        <div class="form-side-column">
+            <div class="info-card warning-card">
+                <h3><span class="icon">⚠️</span> Bloqueo Automático</h3>
+                <p>Al ingresar una Máquina al Taller, su estado pasará automáticamente a <strong>"EN TALLER"</strong>.</p>
+                <p>Esto bloqueará a la máquina en el sistema central para que los despachadores <strong>no puedan asignarla</strong> a nuevas Órdenes de Trabajo ni sacarla a Terreno hasta que el equipo mecánico cierre esta OT.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ medidas_map|json_script:"medidas-map-data" }}
+<script src="{% static 'gestion/js/taller.js' %}"></script>
+{% endblock %}

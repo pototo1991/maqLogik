@@ -1,0 +1,56 @@
+ Guía de Ejecución: Proyecto MaqLogik
+ 1. Visión General
+ MaqLogik es una plataforma SaaS (Software as a Service) diseñada para la gestión integral de maquinaria pesada. Su objetivo es centralizar el control de costos (combustible y mano de obra), mantenimiento preventivo y ubicación satelital utilizando el hardware que ya tienen los operadores: sus smartphones.
+ 2. Arquitectura Técnica (Stack)
+	Backend: Python 3.11 + Django 4.2.
+	Base de Datos: MySQL 8.0 (Normalizada para Multi-tenancy).
+	Contenedores: Docker + Docker-Compose (Puerto local 3307:3306).
+	Frontend Web: Django Templates + JavaScript + Leaflet.js (Mapas).
+	Mobile: PWA (Progressive Web App) o APK vía Capacitor.
+	Servidor de Alertas: Celery + Redis (para procesos en segundo plano).
+3. Roles de Usuario y Accesos
+	Administrador (Owner): Acceso total a reportes de rentabilidad, costos y ubicación de toda la flota.
+	Jefe de Patio (Chief): Gestión operativa, asignación de máquinas, revisión de mantenimientos y stock de combustible.
+	Operador (Operator): Registro de checklists, horas de motor/km, cargas de combustible y envío de posición GPS.
+	Despachador/Seguridad (Dispatcher - Opcional): Registro de entradas y salidas de máquinas del patio físico.
+4. Flujo Operativo (Workflow)
+A continuación, el ciclo de vida de una operación en MaqLogik:
+	A. Inicio de Jornada y Checklist
+		El Operador llega a la máquina y escanea un código QR (opcional) o la selecciona en la App.
+		Debe completar el Módulo de Checklist (Niveles, luces, neumáticos).
+		Regla de Negocio: No se puede abrir una Orden de Trabajo si el checklist tiene fallas críticas o si no se ha realizado en las últimas 12 horas.
+	B. Despacho y Salida
+		Si la empresa tiene Despachador, este valida la salida registrando el horómetro/km inicial y el número de guía.
+		La máquina cambia su estado a "EN RUTA".
+	C. Operación y Tracking
+		La App envía logs de GPS cada "X" minutos a la tabla GPS_Logs.
+		El Operador registra cargas de combustible indicando si es de Tanque Propio (Interna) o Estación de Servicio (Externa).
+	D. Cierre y Análisis
+		Al volver al patio, se registra el horómetro/km final.
+		El sistema calcula automáticamente:
+			Horas trabajadas vs. Combustible consumido.
+			Rendimiento real vs. Teórico del fabricante.
+			Costo de mano de obra según el valor_hora del operador.
+5. Reglas de Negocio Críticas (El Cerebro)
+	Aislamiento SaaS: Todas las consultas a la base de datos deben filtrar obligatoriamente por empresa_id. Ningún usuario puede ver datos de otra empresa.
+	Control de Combustible Ponderado: Las cargas internas deben descontar stock de Inventario_Combustible y recalcular el precio promedio ponderado basado en las entradas de Compras_Combustible.
+	Alertas de Mantenimiento: El sistema debe disparar una alerta cuando el valor_actual_medida esté a menos de 50 unidades (horas o km) del proximo_mantenimiento.
+	Validación de Consumo: Si el consumo real (L/h o Km/L) se desvía más de un 15% del promedio histórico o teórico, se marca el registro para auditoría por posible robo o falla.
+6. Estructura de Datos (Las 9 Tablas)
+	Empresas: Raíz del sistema SaaS.
+	Usuarios: Con roles, RUT, teléfono y valor hora.
+	Maquinaria: Hoja de vida del activo (marca, modelo, horómetro/km, consumo teórico).
+	Checklist: Registro de revisiones diarias.
+	Ordenes_Trabajo: Ciclo de actividad (salida/entrada).
+	GPS_Logs: Historial de coordenadas por máquina.
+	Combustible_Logs: Registro de cada carga (Interna/Externa).
+	Compras_Combustible: Abastecimiento del tanque propio.
+	Inventario_Combustible: Saldo actual y precio ponderado por empresa.
+Próximos Pasos Inmediatos
+	Levantar el entorno: Ejecutar docker-compose up (con el cambio de puerto a 3307).
+	Crear Migraciones: Correr makemigrations y migrate para crear las tablas físicas en MySQL.
+	Crear SuperUser: Ejecutar python manage.py createsuperuser para entrar al panel administrativo.
+	Primer Registro: Crear una Empresa y una Máquina de prueba para validar que las relaciones funcionen.
+
+superusuario
+credenciales admin y contraseña admin123

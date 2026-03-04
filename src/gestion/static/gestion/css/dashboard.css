@@ -1,0 +1,123 @@
+/* =========================================================================
+   MaqLogik - Estilos del Dashboard Principal
+   ========================================================================= */
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.kpi-card {
+    background: rgba(17, 24, 39, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.kpi-title {
+    color: #9ca3af;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+}
+
+.kpi-value {
+    color: white;
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+/* Variaciones de Color Neón */
+.neon-purple { color: #c084fc; text-shadow: 0 0 10px rgba(192, 132, 252, 0.3); }
+.neon-green { color: #10b981; text-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
+.neon-orange { color: #fb923c; text-shadow: 0 0 10px rgba(251, 146, 60, 0.3); }
+.neon-red { color: #f87171; text-shadow: 0 0 10px rgba(248, 113, 113, 0.3); }
+
+.kpi-subtitle {
+    color: #6b7280;
+    font-size: 0.85rem;
+}
+
+/* Panel de Alertas Críticas */
+.alerts-section {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.1) inset;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding-bottom: 15px;
+}
+
+.section-title {
+    color: #fca5a5;
+    font-size: 1.25rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Tabla de Alertas */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table-container table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-container th, .table-container td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: #e5e7eb;
+}
+
+.table-container th {
+    color: #f87171;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.table-container tbody tr:hover {
+    background-color: rgba(248, 113, 113, 0.05);
+}
+
+.critic-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid rgba(239, 68, 68, 0.5);
+}

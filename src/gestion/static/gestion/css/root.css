@@ -1,0 +1,414 @@
+/* ==========================================================================
+   MaqLogik - Estilos del Módulo Administrador Global (Root)
+   ========================================================================== */
+
+/* 0. Clases estructurales base del Dashboard Root (Estilo Glassmorphism Premium) */
+
+.machines-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 24px;
+    padding: 10px 0;
+}
+
+.machine-card {
+    background: var(--glass-bg, rgba(21, 26, 35, 0.6));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+    border-radius: var(--radius-lg, 16px);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.machine-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 15px rgba(59, 130, 246, 0.1) inset;
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.machine-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.machine-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-md, 8px);
+    padding: 14px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted, #9BA3B5);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-main, #FFFFFF);
+}
+
+.form-card {
+    background: var(--glass-bg, rgba(21, 26, 35, 0.6));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+    border-radius: var(--radius-lg, 16px);
+    padding: 28px;
+    box-shadow: var(--glass-shadow, 0 8px 32px rgba(0, 0, 0, 0.4));
+}
+
+.form-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--color-text-muted, #9BA3B5);
+    margin-bottom: 8px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+/* Inputs nativos del formulario - Forzados al estilo glass */
+.form-card input[type="text"],
+.form-card input[type="password"],
+.form-card input[type="email"],
+.form-card input[type="number"],
+.form-card select {
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-radius: var(--radius-md, 8px);
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+
+.form-card input[type="text"]:focus,
+.form-card input[type="password"]:focus,
+.form-card input[type="email"]:focus,
+.form-card select:focus {
+    outline: none;
+    border-color: var(--color-brand, #00E676);
+    background: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.1);
+}
+
+.form-section-title {
+    font-size: 1.1rem;
+    color: var(--color-text-main, #FFFFFF);
+    margin-top: 28px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 10px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Rediseño de Botones en Root para igualar a Global (btn-primary) */
+
+/* Rediseño de Botones en Root para igualar a Global (btn-primary) */
+
+.btn-group-3 {
+    display: flex;
+    gap: 8px; /* Reducimos el gap un poco para que quepan 3 botones cómodos */
+}
+
+.btn-card-action {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 8px;
+    padding: 10px 5px;
+    transition: all 0.2s ease;
+    text-align: center;
+    line-height: 1.2;
+    gap: 4px;
+}
+
+.btn-card-action i.icon {
+    font-size: 1.1rem;
+    margin-bottom: 2px;
+}
+
+/* Botón principal (Verde) - Copia exacta del diseño base */
+.btn-card-primary {
+    background: var(--color-brand, #00e676);
+    color: #000;
+    border: 1px solid var(--color-brand, #00e676);
+    box-shadow: 0 0 15px rgba(0, 230, 118, 0.15);
+}
+
+.btn-card-primary:hover {
+    background: var(--color-brand-hover, #00c853);
+    border-color: var(--color-brand-hover, #00c853);
+    box-shadow: 0 4px 20px rgba(0, 230, 118, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Botón Secundario (Gris/Transparente) */
+.btn-card-secondary {
+    background: rgba(30, 35, 45, 0.4);
+    color: var(--color-text-main, #FFFFFF);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.btn-card-secondary:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+}
+
+/* Estilo exacto del botón agregar de la captura (Outline neon verde) */
+.btn-outline-neon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border-radius: var(--radius-md, 8px);
+    background: transparent;
+    border: 2px solid var(--color-brand, #00E676);
+    color: var(--color-brand, #00E676);
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+}
+
+.btn-outline-neon i.icon {
+    margin-right: 8px;
+    font-weight: bold;
+}
+
+.btn-outline-neon:hover {
+    background: rgba(0, 230, 118, 0.1);
+    box-shadow: 0 0 15px rgba(0, 230, 118, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Contenedor para alinear el botón de agregar al final o la derecha */
+.action-container {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-bottom: 24px;
+    padding-right: 10px;
+}
+
+/* 1. Dashboard - Detalle de tarjetas */
+
+.machine-id-large {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text-main, #FFFFFF);
+}
+
+.status-rut {
+    background: rgba(59, 130, 246, 0.15); 
+    color: #60a5fa;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.module-list-title {
+    font-size: 0.85rem; 
+    color: var(--color-text-muted, #9BA3B5); 
+    margin-bottom: 0.8rem; 
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+    padding-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.module-grid-list {
+    list-style: none; 
+    margin: 0; 
+    padding: 0; 
+    font-size: 0.9rem; 
+    color: var(--color-text-main, #FFFFFF); 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 10px;
+}
+
+.module-item {
+    display: flex; 
+    align-items: center; 
+    gap: 5px;
+}
+
+.module-item-full {
+    display: flex; 
+    align-items: center; 
+    gap: 5px; 
+    grid-column: 1 / -1;
+}
+
+.icon-ok {
+    color: #10b981;
+}
+
+.icon-error {
+    color: #ef4444;
+}
+
+.hr-divider {
+    border: none; 
+    border-top: 1px solid var(--border); 
+    margin: 15px 0;
+}
+
+.btn-group-2 {
+    display: flex; 
+    gap: 10px;
+}
+
+.btn-half {
+    flex: 1; 
+    text-align: center; 
+    font-size: 0.85rem;
+}
+
+.btn-secondary-bg {
+    background: var(--secondary); 
+}
+
+.empty-state-card {
+    grid-column: 1 / -1; 
+    text-align: center; 
+    padding: 3rem; 
+    background: var(--surface); 
+    border-radius: var(--radius-lg);
+}
+
+.empty-state-icon {
+    font-size: 3rem; 
+    margin-bottom: 1rem;
+}
+
+/* 2. Formulario de Nueva Empresa y Owner */
+
+.grid-2-cols {
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 20px;
+}
+
+.form-title-reset {
+    margin-top: 0;
+}
+
+.border-top-group {
+    padding-top: 10px; 
+    border-top: 1px solid var(--border);
+}
+
+.flex-center-gap {
+    display: flex; 
+    align-items: center; 
+    gap: 8px;
+}
+
+.text-small-secondary {
+    font-size: 0.9rem; 
+    color: var(--text-secondary);
+}
+
+.modules-bg-panel {
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 15px; 
+    background: var(--background); 
+    padding: 15px; 
+    border-radius: var(--radius-md);
+}
+
+.module-label-bold {
+    font-weight: bold;
+}
+
+.help-text-mb {
+    font-size: 0.85rem; 
+    color: var(--text-secondary); 
+    margin-bottom: 20px;
+}
+
+.help-text-mt {
+    font-size: 0.8rem; 
+    color: var(--text-secondary); 
+    margin-top: 5px;
+}
+
+.hidden-group {
+    display: none;
+}
+
+.bottom-action-bar {
+    position: sticky; 
+    bottom: 0; 
+    background: var(--surface); 
+    padding: 20px; 
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.05); 
+    margin-top: 30px; 
+    border-radius: 8px 8px 0 0; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    z-index: 10;
+}
+
+.bottom-action-text {
+    color: var(--text-secondary); 
+    font-size: 0.9rem;
+}
+
+.btn-large-rounded {
+    font-size: 1.1rem; 
+    padding: 12px 30px; 
+    border-radius: 30px; 
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}

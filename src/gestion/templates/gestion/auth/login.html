@@ -1,0 +1,69 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso - MaqLogik SaaS</title>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Estilos Premium -->
+    <link rel="stylesheet" href="{% static 'gestion/css/global.css' %}">
+    <link rel="stylesheet" href="{% static 'gestion/css/login_moderno.css' %}">
+</head>
+<body class="login-body">
+    
+    <div class="login-container">
+        <!-- Tarjeta Izquierda (Formulario) -->
+        <div class="login-card p-glass">
+            <div class="login-header">
+                <h2>Bienvenido a <span>MaqLogik</span></h2>
+                <p>Ingresa a tu portal de administración de flota pesada.</p>
+            </div>
+            
+            {% if messages %}
+                <div class="alert-box">
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST" action="{% url 'web_login' %}">
+                {% csrf_token %}
+                <div class="input-group">
+                    <label for="username">Usuario / RUT</label>
+                    <input type="text" id="username" name="username" placeholder="Ingresa tu usuario" required autocomplete="off">
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                </div>
+
+                <div class="login-options">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember">
+                        Recordar mi sesión
+                    </label>
+                    <a href="#" class="forgot-pwd">¿Olvidaste tu contraseña?</a>
+                </div>
+
+                <button type="submit" class="btn-primary">Ingresar al Dashboard</button>
+            </form>
+        </div>
+        
+        <!-- Area Derecha (Ilustración / Decoración) -->
+        <div class="login-art">
+            <div class="art-content">
+                <h3>Inteligencia Operativa</h3>
+                <p>Gestiona tu combustible, mantenimientos y reportes GPS en tiempo real para tomar mejores decisiones.</p>
+                
+                <!-- Micro-animación decorativa -->
+                <div class="floating-orbit"></div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

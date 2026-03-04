@@ -1,0 +1,44 @@
+{% extends 'gestion/base.html' %}
+{% load static %}
+
+{% block title %}{{ accion }} Maquinaria{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'gestion/css/maquinaria.css' %}">
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto 24px;">
+    <h2>{{ accion }} Maquinaria</h2>
+    <p style="color: var(--color-text-muted);">Completa el formulario para {{ accion|lower }} el registro en tu flota.</p>
+</div>
+
+<div class="form-card p-glass">
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-grid">
+            
+            {% for field in form %}
+            <div class="form-group {% if field.name == 'comentarios' %}full-width{% endif %}">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div style="color: var(--color-error); font-size: 0.8rem; margin-top: 4px;">
+                    {{ field.errors }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <div class="form-actions">
+                <a href="{% url 'maquina_list' %}" class="btn-secondary">Cancelar</a>
+                <button type="submit" class="btn-primary" style="width:auto;">Guardar Registro</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'gestion/js/maquinaria.js' %}"></script>
+{% endblock %}

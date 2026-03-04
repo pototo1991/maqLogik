@@ -1,0 +1,111 @@
+/* == Estilos Base y Paginación compartidos (xhtml2pdf) == */
+@page {
+    size: a4 portrait;
+    @frame header_frame {
+        -pdf-frame-content: header_content;
+        left: 50pt; width: 512pt; top: 50pt; height: 40pt;
+    }
+    @frame content_frame {
+        left: 50pt; width: 512pt; top: 100pt; height: 650pt;
+    }
+    @frame footer_frame {
+        -pdf-frame-content: footer_content;
+        left: 50pt; width: 512pt; top: 780pt; height: 40pt;
+    }
+}
+
+body {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    color: #333333;
+}
+
+#header_content {
+}
+
+#footer_content {
+    text-align: right;
+    font-size: 9px;
+    color: #94a3b8;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 5px;
+}
+
+.empresa-info {
+    text-align: center;
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 20px;
+}
+
+.filtros-aplicados {
+    background-color: #f1f5f9;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+}
+th {
+    background-color: #f8fafc;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    padding: 8px;
+    text-align: left;
+    font-weight: bold;
+}
+td {
+    border: 1px solid #e2e8f0;
+    padding: 8px;
+}
+
+table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+}
+table.data-table th {
+    background-color: #f8fafc;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    padding: 8px;
+    text-align: left;
+    font-weight: bold;
+}
+table.data-table td {
+    border: 1px solid #e2e8f0;
+    padding: 8px;
+}
+
+/* == Estilos Específicos: Combustible == */
+.pdf-combustible h1 { color: #10b981; font-size: 18px; margin-bottom: 5px; text-align: center; }
+.pdf-combustible h2 { color: #059669; font-size: 14px; border-bottom: 1px solid #a7f3d0; padding-bottom: 3px; margin-top: 20px; }
+.metric-cards { width: 100%; margin-bottom: 20px; }
+.metric-cards td { text-align: center; border: 1px solid #10b981; background-color: #ecfdf5; padding: 15px; width: 50%; }
+.metric-num { font-size: 18px; font-weight: bold; color: #047857; }
+
+/* == Estilos Específicos: Historial Clínico Taller == */
+.pdf-historial h1 { color: #ea580c; font-size: 18px; margin-bottom: 5px; text-align: center; }
+.machine-card { background-color: #fff7ed; border: 1px solid #fed7aa; padding: 15px; border-radius: 5px; margin-bottom: 25px; }
+.machine-title { font-size: 16px; color: #c2410c; font-weight: bold; margin-bottom: 10px; }
+.intervention-box { border: 1px solid #e2e8f0; margin-bottom: 15px; border-radius: 4px; }
+.intervention-header { background-color: #f8fafc; padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-weight: bold; color: #1e293b; }
+.intervention-body { padding: 12px; }
+table.detail-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+table.detail-table td { padding: 4px 8px; border: none; border-bottom: 1px dashed #e2e8f0; }
+.label { color: #64748b; font-weight: normal; width: 120px; }
+.value { color: #0f172a; font-weight: bold; }
+
+/* == Estilos Específicos: Actividad Terreno == */
+.pdf-terreno h1 { color: #1e3a8a; font-size: 18px; margin-bottom: 5px; text-align: center; }
+.pdf-terreno h2 { color: #2563eb; font-size: 14px; border-bottom: 1px solid #bfdbfe; padding-bottom: 3px; margin-top: 20px; }
+.status-ok { color: #15803d; font-weight: bold; }
+.status-bad { color: #b91c1c; font-weight: bold; }

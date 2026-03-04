@@ -1,0 +1,53 @@
+{% extends 'gestion/base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'gestion/css/forms.css' %}">
+<link rel="stylesheet" href="{% static 'gestion/css/combustible.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="glass-form-box">
+        <div class="form-header">
+            <h2>{{ titulo }}</h2>
+            <p style="color: #9ca3af; font-size: 0.95rem; margin-bottom: 25px;">{{ subtitulo }}</p>
+        </div>
+        
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="alert-box">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+            <div class="form-group" id="group_{{ field.name }}">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <ul class="error-list">
+                    {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <div class="form-actions">
+                <a href="{% url 'combustible_dashboard' %}" class="btn-cancel">Cancelar</a>
+                <button type="submit" class="btn-submit">Guardar Registro</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'gestion/js/combustible.js' %}?v=2.3"></script>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends 'gestion/base.html' %}
+{% load static %}
+
+{% block title %}Inventario de Combustible{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'gestion/css/forms.css' %}">
+<link rel="stylesheet" href="{% static 'gestion/css/combustible.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1 style="color: white; margin-bottom: 20px;">Inventario y Movimiento Logístico</h1>
+
+<!-- KPI Section -->
+<div class="dashboard-grid">
+    <div class="kpi-card">
+        <div class="kpi-title">Stock Actual en Patio</div>
+        <div class="kpi-value neon-green">{{ inventario.stock_actual|floatformat:1 }} Lts</div>
+        <div class="kpi-subtitle">Disponible para cargas internas</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-title">Precio Prom. Ponderado (PPP)</div>
+        <div class="kpi-value neon-blue">${{ inventario.precio_promedio_ponderado|floatformat:2 }}</div>
+        <div class="kpi-subtitle">Costo unitario referencial</div>
+    </div>
+    <div class="kpi-card" style="align-items: center; text-align: center;">
+        <div class="kpi-title" style="width: 100%">Acciones Rápidas</div>
+        <div style="display: flex; gap: 10px; margin-top: 10px; width: 100%; justify-content: center;">
+            <a href="{% url 'compra_create' %}" class="btn-neon btn-outline-blue">📥 Ingresar Factura (Compra)</a>
+            <a href="{% url 'carga_create' %}" class="btn-neon">📤 Registrar Carga a Máquina</a>
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <!-- Últimas Cargas a Maquinaria -->
+    <div>
+        <div class="section-header">
+            <h3 class="section-title">Últimos Consumos (Máquinas)</h3>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>OT</th>
+                        <th>Máquina</th>
+                        <th>Tipo</th>
+                        <th>Litros</th>
+                        <th>Costo Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in cargas %}
+                    <tr>
+                        <td>{{ c.fecha_carga|date:"d/m/Y" }}</td>
+                        <td style="color: #9ca3af;">{% if c.orden_trabajo %}OT-{{ c.orden_trabajo.id }}{% else %}-{% endif %}</td>
+                        <td>{{ c.maquina.id_interno }} - {{ c.maquina.patente|default:"" }}</td>
+                        <td>
+                            <span class="badge {% if c.tipo_carga == 'INTERNA' %}badge-interna{% else %}badge-externa{% endif %}">
+                                {{ c.get_tipo_carga_display }}
+                            </span>
+                        </td>
+                        <td style="color: #f87171; font-weight: 500;">-{{ c.litros|floatformat:1 }} L</td>
+                        <td>${{ c.costo_total|floatformat:0 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" style="text-align: center; color: #6b7280;">No hay cargas recientes</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Últimas Compras/Facturas -->
+    <div>
+        <div class="section-header">
+            <h3 class="section-title">Últimas Compras (Facturas)</h3>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Factura</th>
+                        <th>Litros</th>
+                        <th>Total Pago</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for comp in compras %}
+                    <tr>
+                        <td>{{ comp.fecha_compra|date:"d/m/Y" }}</td>
+                        <td style="color: #9ca3af;">{{ comp.nro_factura }}</td>
+                        <td style="color: #34d399; font-weight: 500;">+{{ comp.cantidad_litros|floatformat:1 }} L</td>
+                        <td>${{ comp.total_pago|floatformat:0 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" style="text-align: center; color: #6b7280;">No hay facturas ingresadas</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

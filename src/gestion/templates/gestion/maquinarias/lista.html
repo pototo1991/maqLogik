@@ -1,0 +1,60 @@
+{% extends 'gestion/base.html' %}
+{% load static %}
+{% load maquinaria_tags sort_tags %}
+
+{% block title %}Inventario de Maquinarias{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'gestion/css/maquinaria.css' %}">
+<link rel="stylesheet" href="{% static 'gestion/css/checklist.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="header-actions" style="margin-bottom: 2rem;">
+    <h1 style="color: white; margin: 0;">🚜 Inventario de Maquinarias</h1>
+    <a href="{% url 'maquina_create' %}" class="btn-neon">+ Registrar Equipo</a>
+</div>
+
+<div class="table-container p-glass">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th><a href="{% sort_url 'id_interno' current_sort current_dir %}" style="color: inherit; text-decoration: none;">ID Interno{% sort_icon 'id_interno' current_sort current_dir %}</a></th>
+                <th><a href="{% sort_url 'patente' current_sort current_dir %}" style="color: inherit; text-decoration: none;">Patente{% sort_icon 'patente' current_sort current_dir %}</a></th>
+                <th><a href="{% sort_url 'tipo' current_sort current_dir %}" style="color: inherit; text-decoration: none;">Tipo de Equipo{% sort_icon 'tipo' current_sort current_dir %}</a></th>
+                <th><a href="{% sort_url 'marca' current_sort current_dir %}" style="color: inherit; text-decoration: none;">Marca/Modelo{% sort_icon 'marca' current_sort current_dir %}</a></th>
+                <th><a href="{% sort_url 'operador_asignado__username' current_sort current_dir %}" style="color: inherit; text-decoration: none;">Operador Asignado{% sort_icon 'operador_asignado__username' current_sort current_dir %}</a></th>
+                <th><a href="{% sort_url 'estado' current_sort current_dir %}" style="color: inherit; text-decoration: none;">Estado{% sort_icon 'estado' current_sort current_dir %}</a></th>
+                <th><a href="{% sort_url 'valor_actual_medida' current_sort current_dir %}" style="color: inherit; text-decoration: none;">Horómetro/KM Actual{% sort_icon 'valor_actual_medida' current_sort current_dir %}</a></th>
+                <th>Próx. Mantenimiento</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in maquinarias %}
+            <tr>
+                <td><strong>{{ m.id_interno }}</strong></td>
+                <td>{{ m.patente }}</td>
+                <td>{{ m.get_tipo_display }}</td>
+                <td>{{ m.marca }} - {{ m.modelo }}</td>
+                <td>{{ m.operador_asignado.nombre_completo|default:"<span style='color: #6b7280; font-size: 0.8rem;'>Sin asignar</span>" }}</td>
+                <td>
+                    <span class="badge {{ m.estado|lower }}">{{ m.get_estado_display }}</span>
+                </td>
+                <td>{{ m.valor_actual_medida|formatear_medida:m.unidad_medida }}</td>
+                <td>{{ m.proximo_mantenimiento|formatear_medida:m.unidad_medida }}</td>
+                <td>
+                    <a href="{% url 'maquina_update' m.pk %}" class="btn-sm">✏️ Editar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" style="text-align:center; padding: 40px; color: var(--color-text-muted);">
+                    No hay maquinarias registradas. ¡Comienza creando una nueva!
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends 'gestion/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'gestion/css/root.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <div class="header-info">
+        <h1 class="page-title">Alta de Nueva Empresa (SaaS)</h1>
+        <div class="date-display">Panel Global de Administración</div>
+    </div>
+</div>
+
+<form method="post" action="{% url 'root_create_empresa' %}">
+    {% csrf_token %}
+    
+    <div class="grid-2-cols">
+        
+        <!-- COLUMNA IZQUIERDA: EMPRESA Y MÓDULOS -->
+        <div class="form-card">
+            <h2 class="form-section-title form-title-reset"><i class="icon">🏢</i> 1. Datos de la Empresa Cliente</h2>
+            
+            <div class="form-group">
+                <label class="form-label">{{ form_empresa.nombre_fantasia.label }}*</label>
+                {{ form_empresa.nombre_fantasia }}
+                {{ form_empresa.nombre_fantasia.errors }}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">{{ form_empresa.rut_empresa.label }}*</label>
+                {{ form_empresa.rut_empresa }}
+                {{ form_empresa.rut_empresa.errors }}
+            </div>
+
+            <div class="form-group border-top-group">
+                <label class="form-label">Permitir Rol "Despachador":</label>
+                <div class="flex-center-gap">
+                    {{ form_empresa.usa_despachador }}
+                    <span class="text-small-secondary">Habilita a bodegueros a generar checklists extras paralelos al operador principal.</span>
+                </div>
+            </div>
+
+            <h3 class="form-section-title"><i class="icon">⚙️</i> Plan Contratado (Feature Flags)</h3>
+            <div class="modules-bg-panel">
+                
+                <div class="flex-center-gap">
+                    {{ form_empresa.modulo_checklist }}
+                    <span>Checklists Operativos</span>
+                </div>
+
+                <div class="flex-center-gap">
+                    {{ form_empresa.modulo_mantencion }}
+                    <span>Taller y Mantenimiento</span>
+                </div>
+
+                <div class="flex-center-gap">
+                    {{ form_empresa.modulo_combustible }}
+                    <span>Gestión de Combustible</span>
+                </div>
+
+                <div class="flex-center-gap">
+                    {{ form_empresa.modulo_gps }}
+                    <span>Telemetría / Rastreo GPS</span>
+                </div>
+                
+                <div class="module-item-full">
+                    {{ form_empresa.modulo_reporteria }}
+                    <span class="module-label-bold">Centro de Reportes y Exportación PDF</span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: USUARIO OWNER -->
+        <div class="form-card">
+            <h2 class="form-section-title form-title-reset"><i class="icon">👑</i> 2. Cuenta del Administrador Local (OWNER)</h2>
+            <p class="help-text-mb">Este es el usuario "Raíz" de la empresa cliente. Con estas credenciales, nuestro cliente ingresará a su propio panel para crear a sus Operadores, Controladores de Combustible y Mecánicos.</p>
+
+
+            <div class="form-group">
+                <label class="form-label">Nombre de Usuario para el Cliente*</label>
+                {{ form_owner.username }}
+                <div class="help-text-mt">Ingrese un nombre de usuario único para el cliente (Ej: admin.nombre).</div>
+                {{ form_owner.username.errors }}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Contraseña Temporal*</label>
+                    {{ form_owner.password1 }}
+                    {{ form_owner.password1.errors }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirmar Contraseña*</label>
+                    {{ form_owner.password2 }}
+                    {{ form_owner.password2.errors }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">{{ form_owner.nombre_completo.label }}*</label>
+                {{ form_owner.nombre_completo }}
+                {{ form_owner.nombre_completo.errors }}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">{{ form_owner.rut.label }}*</label>
+                    {{ form_owner.rut }}
+                    {{ form_owner.rut.errors }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ form_owner.telefono.label }}</label>
+                    {{ form_owner.telefono }}
+                    {{ form_owner.telefono.errors }}
+                </div>
+            </div>
+
+            <div class="hidden-group">
+                <!-- Ocultos, generados por defecto en el backend o irrelevantes para un Owner Root -->
+                {{ form_owner.email }}
+                {{ form_owner.estado }}
+                {{ form_owner.valor_hora }}
+            </div>
+
+        </div>
+    </div>
+
+    <!-- BOTON TIPO CINTA FLOTANTE ABARCADORA -->
+    <div class="bottom-action-bar">
+        <span class="bottom-action-text">Revise que los módulos contratados coincidan con el contrato comercial.</span>
+        <button type="submit" class="btn btn-primary btn-large-rounded"><i class="icon">🚀</i> Confirmar y Dar de Alta en MaqLogik</button>
+    </div>
+
+</form>
+{% endblock %}

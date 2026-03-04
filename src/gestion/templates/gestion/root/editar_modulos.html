@@ -1,0 +1,78 @@
+{% extends 'gestion/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'gestion/css/root.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <div class="header-info">
+        <h1 class="page-title">Administrar Módulos SaaS</h1>
+        <div class="date-display">Panel Global de Administración</div>
+    </div>
+</div>
+
+<form method="post" action="{% url 'root_edit_modules' empresa.id %}">
+    {% csrf_token %}
+    
+    <div class="form-card" style="max-width: 800px; margin: 0 auto;">
+        <h2 class="form-section-title form-title-reset">
+            <i class="icon">🏢</i> Empresa: {{ empresa.nombre_fantasia }} ({{ empresa.rut_empresa }})
+        </h2>
+        
+        <p class="help-text-mb">Ajuste los módulos comerciales que tiene contratados esta empresa. Los cambios se verán reflejados inmediatamente en las cuentas de sus usuarios y esconderán/mostrarán los accesos en su menú lateral.</p>
+
+        <!-- ZONA OCULTA PARA NO SOBRESCRIBIR LOS DATOS BASICOS -->
+        <div class="hidden-group" style="display: none;">
+            {{ form.nombre_fantasia }}
+            {{ form.rut_empresa }}
+        </div>
+
+        <div class="form-group border-top-group">
+            <label class="form-label">Permitir Rol "Despachador":</label>
+            <div class="flex-center-gap">
+                {{ form.usa_despachador }}
+                <span class="text-small-secondary">Habilita a bodegueros a generar checklists extras paralelos al operador principal.</span>
+            </div>
+        </div>
+
+        <h3 class="form-section-title"><i class="icon">⚙️</i> Plan Contratado (Feature Flags)</h3>
+        <div class="modules-bg-panel">
+            
+            <div class="flex-center-gap">
+                {{ form.modulo_checklist }}
+                <span>Checklists Operativos</span>
+            </div>
+
+            <div class="flex-center-gap">
+                {{ form.modulo_mantencion }}
+                <span>Taller y Mantenimiento</span>
+            </div>
+
+            <div class="flex-center-gap">
+                {{ form.modulo_combustible }}
+                <span>Gestión de Combustible</span>
+            </div>
+
+            <div class="flex-center-gap">
+                {{ form.modulo_gps }}
+                <span>Telemetría / Rastreo GPS</span>
+            </div>
+            
+            <div class="module-item-full">
+                {{ form.modulo_reporteria }}
+                <span class="module-label-bold">Centro de Reportes y Exportación PDF</span>
+            </div>
+
+        </div>
+
+        <div class="bottom-action-bar" style="position: static; box-shadow: none; margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); padding: 20px 0 0 0;">
+            <a href="{% url 'root_dashboard' %}" class="btn-card-action btn-card-secondary" style="padding: 12px 24px;">Cancelar</a>
+            <button type="submit" class="btn btn-primary btn-large-rounded">
+                <i class="icon">💾</i> Guardar Cambios
+            </button>
+        </div>
+    </div>
+</form>
+{% endblock %}

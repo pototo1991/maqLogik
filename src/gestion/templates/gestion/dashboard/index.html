@@ -1,0 +1,271 @@
+{% extends 'gestion/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Principal{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'gestion/css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1 style="color: white; margin-bottom: 25px;">Resumen Operativo</h1>
+
+<!-- Tarjetas KPI -->
+<div class="dashboard-grid">
+    <a href="{% url 'maquina_list' %}" class="kpi-card" style="text-decoration: none;">
+        <div class="kpi-title">Máquinas Totales</div>
+        <div class="kpi-value neon-purple">{{ total_maquinas }}</div>
+        <div class="kpi-subtitle">Flota registrada en el sistema</div>
+    </a>
+    <a href="{% url 'orden_list' %}" class="kpi-card" style="text-decoration: none;">
+        <div class="kpi-title">Órdenes Activas</div>
+        <div class="kpi-value neon-green">{{ ordenes_activas }}</div>
+        <div class="kpi-subtitle">Equipos en Ruta ahora mismo</div>
+    </a>
+    <a href="{% url 'maquina_list' %}" class="kpi-card" style="text-decoration: none;">
+        <div class="kpi-title">Equipos Operando</div>
+        <div class="kpi-value neon-orange">{{ maquinas_en_ruta }}</div>
+        <div class="kpi-subtitle">Marcados con estado EN_RUTA</div>
+    </a>
+    <a href="{% url 'taller_dashboard' %}" class="kpi-card" style="text-decoration: none;">
+        <div class="kpi-title">En Taller</div>
+        <div class="kpi-value neon-red">{{ maquinas_en_taller }}</div>
+        <div class="kpi-subtitle">Vehículos fuera de servicio</div>
+    </a>
+</div>
+
+<!-- Alertas Críticas (El Cerebro) -->
+<div class="alerts-section">
+    <div class="section-header">
+        <h3 class="section-title">
+            <span style="font-size: 1.5rem;">⚠️</span> Alertas Críticas de Mantenimiento
+        </h3>
+    </div>
+    
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Máquina</th>
+                    <th>Estado Actual</th>
+                    <th>Medida Actual</th>
+                    <th>Próximo Mant.</th>
+                    <th>Faltan</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for maquina in alertas_mantenimiento %}
+                <tr>
+                    <td>
+                        <strong>{{ maquina.id_interno }}</strong>
+                        <span style="color: #9ca3af; font-size: 0.85rem; display: block;">{{ maquina.patente|default:"N/A" }}</span>
+                    </td>
+                    <td>
+                        <span style="color: {% if maquina.estado == 'DISPONIBLE' %}#10b981{% elif maquina.estado == 'EN_RUTA' %}#fbbf24{% else %}#ef4444{% endif %};">
+                            {{ maquina.get_estado_display }}
+                        </span>
+                    </td>
+                    <td style="color: #fca5a5;">{{ maquina.valor_actual_medida }} {{ maquina.get_unidad_medida_display }}</td>
+                    <td style="color: white;">{{ maquina.proximo_mantenimiento }} {{ maquina.get_unidad_medida_display }}</td>
+                    <td>
+                        <span class="critic-badge">
+                            Vence Pronto
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'maquina_update' maquina.id %}" style="color: #3b82f6; text-decoration: none; font-size: 0.9rem;">Ver Ficha</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: #9ca3af; padding: 30px;">
+                        No hay máquinas cercanas a su mantenimiento de rutina (Rango < 50 hrs/km).
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ==========================================
+     INTEGRACIÓN: ALERTAS DE TERRENO (CHECKLISTS)
+     ========================================== -->
+<div class="alerts-section" style="margin-top: 30px;">
+    <div class="section-header">
+        <h3 class="section-title">
+            <span style="font-size: 1.5rem;">🚨</span> Reportes de Terreno (Últimas 48 hrs)
+        </h3>
+    </div>
+
+    <!-- 1. Fallas CRÍTICAS -->
+    {% if checklists_criticos %}
+    <h4 style="color: #ef4444; margin-bottom: 15px; margin-top: 20px;">Fallas Críticas (Requieren Taller)</h4>
+    <div class="table-container" style="border-left: 4px solid #ef4444;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Máquina</th>
+                    <th>Estado de Máquina</th>
+                    <th>Operador</th>
+                    <th>Falla Reportada</th>
+                    <th>Fecha Reporte</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for checklist in checklists_criticos %}
+                <tr>
+                    <td>
+                        <strong>{{ checklist.maquina.id_interno }}</strong>
+                        <span style="color: #9ca3af; font-size: 0.85rem; display: block;">{{ checklist.maquina.patente|default:"N/A" }}</span>
+                    </td>
+                    <td>
+                        <span style="color: {% if checklist.maquina.estado == 'DISPONIBLE' %}#10b981{% elif checklist.maquina.estado == 'EN_RUTA' %}#fbbf24{% else %}#ef4444{% endif %};">
+                            {{ checklist.maquina.get_estado_display }}
+                        </span>
+                    </td>
+                    <td>{{ checklist.usuario.get_full_name|default:checklist.usuario.username }}</td>
+                    <td>
+                        {% if not checklist.niveles_ok %}<span class="critic-badge" style="background: rgba(239, 68, 68, 0.2); margin-right: 5px;">Niveles</span>{% endif %}
+                        {% if not checklist.luces_ok %}<span class="critic-badge" style="background: rgba(239, 68, 68, 0.2); margin-right: 5px;">Luces</span>{% endif %}
+                        {% if not checklist.estructura_ok %}<span class="critic-badge" style="background: rgba(239, 68, 68, 0.2); margin-right: 5px;">Estructura</span>{% endif %}
+                        {% if checklist.comentarios %}
+                            <p style="font-size: 0.85rem; color: #fca5a5; margin-top: 5px;">{{ checklist.comentarios|truncatechars:50 }}</p>
+                        {% endif %}
+                    </td>
+                    <td>{{ checklist.fecha_revision|date:"d M H:i" }}</td>
+                    <td>
+                        <a href="{% url 'taller_dashboard' %}" style="color: #ef4444; text-decoration: none; font-weight: bold; font-size: 0.9rem;">Abrir OT ➔</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- 2. Avisos PREVENTIVOS / OBSERVACIONES -->
+    {% if checklists_preventivos %}
+    <h4 style="color: #fbbf24; margin-bottom: 15px; margin-top: 20px;">Observaciones Preventivas (Sugerencias)</h4>
+    <div class="table-container" style="border-left: 4px solid #fbbf24;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Máquina</th>
+                    <th>Operador</th>
+                    <th>Comentarios del Operador</th>
+                    <th>Fecha Reporte</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for checklist in checklists_preventivos %}
+                <tr>
+                    <td>
+                        <strong>{{ checklist.maquina.id_interno }}</strong>
+                    </td>
+                    <td>{{ checklist.usuario.get_full_name|default:checklist.usuario.username }}</td>
+                    <td>
+                        <span style="color: #fde68a; font-style: italic;">"{{ checklist.comentarios }}"</span>
+                    </td>
+                    <td style="color: #d1d5db;">{{ checklist.fecha_revision|date:"d M H:i" }}</td>
+                    <td>
+                        <a href="{% url 'maquina_update' checklist.maquina.id %}" style="color: #3b82f6; text-decoration: none; font-size: 0.9rem;">Ver Ficha</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    
+    {% if not checklists_criticos and not checklists_preventivos %}
+    <div style="text-align: center; color: #10b981; padding: 20px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; margin-top: 20px;">
+        ✅ No hay reportes negativos de terreno en las últimas 48 horas.
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- ==========================================
+     ALARMAS OPERATIVAS (USO FUERA DE TURNO)
+     ========================================== -->
+{% if alertas_madrugadores or alertas_rezagados %}
+<div class="alerts-section" style="border: 1px solid #f97316; background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 25px; box-shadow: 0 0 20px rgba(249, 115, 22, 0.1) inset; margin-top: 30px;">
+    <div class="section-header" style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;">
+        <h3 class="section-title" style="color: #fdba74; margin: 0; font-size: 1.25rem;">
+            <i class="icon">⏰</i> Alertas de Horario Operativo
+        </h3>
+        <span style="color: #9ca3af; font-size: 0.85rem; margin-left: auto;">Patrón Base: 08:00 hrs a 19:00 hrs</span>
+    </div>
+
+    <!-- 1. MADRUGADORES (< 08:00 AM) -->
+    {% if alertas_madrugadores %}
+    <h4 style="color: #fbbf24; margin-bottom: 15px;">Salidas Irregulares (Antes de las 08:00 AM)</h4>
+    <div class="table-container" style="border-left: 4px solid #fbbf24; margin-bottom: 25px;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Máquina</th>
+                    <th>Operador asignado</th>
+                    <th>Despachado Por</th>
+                    <th>Hora de Salida</th>
+                    <th>Estado de OT</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ot in alertas_madrugadores %}
+                <tr>
+                    <td><strong>{{ ot.maquina.id_interno }}</strong> - {{ ot.maquina.patente|default:"N/A" }}</td>
+                    <td>{{ ot.operador.get_full_name|default:ot.operador.username }}</td>
+                    <td>{{ ot.despachador.username|default:"Auto-Despacho" }}</td>
+                    <td style="color: #fca5a5; font-weight: bold;">{{ ot.fecha_salida|date:"H:i" }} hrs ({{ ot.fecha_salida|date:"d M" }})</td>
+                    <td>
+                        <a href="{% url 'orden_close' ot.id %}" style="color: #3b82f6; text-decoration: none; font-size: 0.9rem;">Cerrar OT ➔</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- 2. REZAGADOS (Noches > 19:00 PM) -->
+    {% if alertas_rezagados %}
+    <h4 style="color: #ef4444; margin-bottom: 15px;">Retornos Pendientes (Horario Fuera de Rango: Actual {{ hora_actual_servidor }}:00)</h4>
+    <div class="table-container" style="border-left: 4px solid #ef4444;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Máquina</th>
+                    <th>Operador a cargo</th>
+                    <th>Retraso Desde (Salida)</th>
+                    <th>Alerta</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ot in alertas_rezagados %}
+                <tr>
+                    <td><strong>{{ ot.maquina.id_interno }}</strong> - {{ ot.maquina.patente|default:"N/A" }}</td>
+                    <td>{{ ot.operador.get_full_name|default:ot.operador.username }}</td>
+                    <td>{{ ot.fecha_salida|date:"d M - H:i" }} hrs</td>
+                    <td>
+                        <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5;">MÁQUINA NO HA VUELTO</span>
+                    </td>
+                    <td>
+                        <a href="{% url 'orden_close' ot.id %}" style="color: #ef4444; font-weight: bold; text-decoration: none; font-size: 0.9rem;">Cerrar OT ➔</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+</div>
+{% endif %}
+
+{% endblock %}

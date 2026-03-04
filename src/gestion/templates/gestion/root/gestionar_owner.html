@@ -1,0 +1,97 @@
+{% extends 'gestion/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'gestion/css/root.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <div class="header-info">
+        <h1 class="page-title">Gestión de Cuenta (Owner)</h1>
+        <div class="date-display">Panel Global de Administración</div>
+    </div>
+</div>
+
+<div class="machines-grid" style="grid-template-columns: 1fr; max-width: 800px; margin: 0 auto; margin-bottom: 2rem;">
+    <!-- Tarjeta de Información del Owner -->
+    <div class="machine-card" style="border-left: 4px solid var(--accent, #3b82f6);">
+        <h3 class="module-list-title"><i class="icon">👤</i> Detalles de la Cuenta Principal</h3>
+        <p class="text-secondary" style="margin-bottom: 1rem;">Administrador local de la plataforma MaqLogik para esta empresa.</p>
+        
+        <div class="machine-stats" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 0;">
+            <div class="stat-item">
+                <span class="stat-label">Nombre de Usuario</span>
+                <span class="stat-value" style="font-size: 1.1rem;">{{ owner.username }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Correo Registrado</span>
+                <span class="stat-value" style="font-size: 1.1rem;">{{ owner.email|default:"No registrado" }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Nombre Completo</span>
+                <span class="stat-value" style="font-size: 1.1rem;">{{ owner.nombre_completo|default:"-" }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">RUT / Identificador</span>
+                <span class="stat-value" style="font-size: 1.1rem;">{{ owner.rut|default:"-" }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Estado actual de la cuenta</span>
+                {% if owner.estado == 'ACTIVO' %}
+                <span class="status-badge status-disponible">ACTIVA</span>
+                {% else %}
+                <span class="status-badge status-mantenimiento">{{ owner.estado }}</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="post" action="{% url 'root_manage_owner' empresa.id %}">
+    {% csrf_token %}
+    
+    <div class="form-card" style="max-width: 800px; margin: 0 auto;">
+        <h2 class="form-section-title form-title-reset">
+            <i class="icon">🔑</i> Restablecer Contraseña
+        </h2>
+        <p class="help-text-mb">Utilice este formulario únicamente en caso de que el cliente haya olvidado su clave de acceso. Al restablecerla aquí, ignorará la validación de la contraseña antigua.</p>
+
+        <div class="two-columns-mobile" style="grid-template-columns: 1fr;">
+            <!-- Renderizado manual de SetPasswordForm para inyectar estilos de root.css -->
+            {% for field in form %}
+            <div class="form-group border-top-group">
+                <label class="form-label">{{ field.label }}:</label>
+                {{ field }}
+                {% if field.help_text %}
+                <div class="text-small-secondary" style="margin-top: 5px;">{{ field.help_text|safe }}</div>
+                {% endif %}
+                {% if field.errors %}
+                <div class="text-error" style="color: #ef4444; margin-top: 5px; font-size: 0.85rem;">
+                    {{ field.errors|striptags }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="bottom-action-bar" style="position: static; box-shadow: none; margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); padding: 20px 0 0 0;">
+            <a href="{% url 'root_dashboard' %}" class="btn-card-action btn-card-secondary" style="padding: 12px 24px;">Volver sin guardar</a>
+            <button type="submit" class="btn btn-primary btn-large-rounded">
+                <i class="icon">💾</i> Guardar Nueva Clave
+            </button>
+        </div>
+    </div>
+</form>
+
+<script>
+    // Asignar clases nativas del formulario a los input del SetPasswordForm creado por Django
+    document.addEventListener("DOMContentLoaded", function() {
+        const inputs = document.querySelectorAll('.form-card input[type="password"]');
+        inputs.forEach(input => {
+            input.classList.add('form-input');
+            input.style.width = '100%';
+        });
+    });
+</script>
+{% endblock %}

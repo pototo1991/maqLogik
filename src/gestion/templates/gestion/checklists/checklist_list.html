@@ -1,0 +1,81 @@
+{% extends 'gestion/base.html' %}
+{% load static %}
+
+{% block title %}Checklists Diarios{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'gestion/css/forms.css' %}">
+<link rel="stylesheet" href="{% static 'gestion/css/checklist.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="header-actions">
+    <h1 style="color: white; margin: 0;">Historial de Revisiones Diarias</h1>
+    <a href="{% url 'checklist_create' %}" class="btn-neon">+ Registrar Checklist</a>
+</div>
+
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Fecha/Hora</th>
+                <th>Máquina</th>
+                <th>Operador/Revisor</th>
+                <th>Niveles</th>
+                <th>Luces</th>
+                <th>Estructura</th>
+                <th>Comentarios</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in checklists %}
+            <tr>
+                <td style="color: #9ca3af;">{{ c.fecha_revision|date:"d/m/Y H:i" }}</td>
+                <td style="font-weight: 500;">{{ c.maquina.id_interno }} ({{ c.maquina.patente }})</td>
+                <td>{{ c.usuario.get_full_name|default:c.usuario.username }}</td>
+                
+                <td>
+                    {% if c.niveles_ok %}
+                        <span class="badge success">✓ OK</span>
+                    {% else %}
+                        <span class="badge danger">⚠️ Falla</span>
+                    {% endif %}
+                </td>
+                
+                <td>
+                    {% if c.luces_ok %}
+                        <span class="badge success">✓ OK</span>
+                    {% else %}
+                        <span class="badge danger">⚠️ Falla</span>
+                    {% endif %}
+                </td>
+                
+                <td>
+                    {% if c.estructura_ok %}
+                        <span class="badge success">✓ OK</span>
+                    {% else %}
+                        <span class="badge danger">⚠️ Falla</span>
+                    {% endif %}
+                </td>
+                
+                <td>
+                    {% if c.comentarios %}
+                        <span style="font-size: 0.85rem; color: #d1d5db;" title="{{ c.comentarios }}">
+                            {{ c.comentarios|truncatechars:30 }}
+                        </span>
+                    {% else %}
+                        <span style="color: #6b7280; font-size: 0.85rem;">Ninguno</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 30px; color: #9ca3af;">
+                    No hay revisiones (checklists) registradas para tu maquinaria.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

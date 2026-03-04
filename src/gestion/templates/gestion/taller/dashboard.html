@@ -1,0 +1,218 @@
+{% extends 'gestion/base.html' %}
+{% load static sort_tags %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'gestion/css/forms.css' %}">
+<link rel="stylesheet" href="{% static 'gestion/css/checklist.css' %}">
+<link rel="stylesheet" href="{% static 'gestion/css/maquinaria.css' %}">
+<link rel="stylesheet" href="{% static 'gestion/css/taller.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="header-actions" style="margin-bottom: 2rem;">
+    <h1 style="color: white; margin: 0;">⚙️ Taller y Mantenimiento</h1>
+    <a href="{% url 'taller_create_ot' %}" class="btn-neon">+ Ingresar Máquina Manualmente</a>
+</div>
+
+<!-- PANEL 0: Alertas desde Terreno y Mantenimiento (Triage) -->
+{% if checklists_criticos or alertas_mantenimiento %}
+<div class="dashboard-panel">
+    <h2>🚨 Triage: Fallas de Terreno y Mantenimientos Preventivos</h2>
+    <p style="color: #94a3b8; font-size: 0.9rem; margin-top: -10px; margin-bottom: 20px;">
+        Las siguientes máquinas requieren atención prioritaria. Presione "Transformar/Abrir O.T." para ingresarlas mediante Orden de Taller.
+    </p>
+
+    <!-- Sub-sección 1: Checklists Críticos -->
+    {% if checklists_criticos %}
+    <h3 style="color: #fca5a5; margin-top: 10px; font-size: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px;">Fallas Reportadas en Terreno (Checklists Últimas 48 hrs)</h3>
+    <div class="table-container" style="margin-bottom: 30px; border-left: 4px solid #ef4444;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Fecha Reporte</th>
+                    <th>Máquina</th>
+                    <th>Operador</th>
+                    <th>Componentes Fallos</th>
+                    <th>Diagnóstico Breve</th>
+                    <th>Acción Inmediata</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for chk in checklists_criticos %}
+                <tr>
+                    <td style="color: #cbd5e1;">{{ chk.fecha_revision|date:"d M - H:i" }}</td>
+                    <td>
+                        <strong style="color: white; font-size: 1.1rem;">{{ chk.maquina.id_interno }}</strong>
+                    </td>
+                    <td>{{ chk.usuario.get_full_name|default:chk.usuario.username }}</td>
+                    <td>
+                        {% if not chk.niveles_ok %}<span class="status-badge" style="background: rgba(239,68,68,0.2); color:#fca5a5;">Niveles</span>{% endif %}
+                        {% if not chk.luces_ok %}<span class="status-badge" style="background: rgba(239,68,68,0.2); color:#fca5a5;">Opticas</span>{% endif %}
+                        {% if not chk.estructura_ok %}<span class="status-badge" style="background: rgba(239,68,68,0.2); color:#fca5a5;">Estructura</span>{% endif %}
+                    </td>
+                    <td style="color: #f87171; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ chk.comentarios }}">
+                        {{ chk.comentarios|default:"Sin notas adicionales." }}
+                    </td>
+                    <td>
+                        <a href="{% url 'taller_create_from_checklist' chk.id %}" class="btn-submit btn-success" style="padding: 0.5rem 1rem; font-size: 0.85rem; text-decoration: none;">Transformar en O.T. ➔</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- Sub-sección 2: Mantenimientos por Horas/Km -->
+    {% if alertas_mantenimiento %}
+    <h3 style="color: #fdba74; margin-top: 20px; font-size: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px;">Mantenimiento Preventivo (Rango &lt; 50 hrs/km)</h3>
+    <div class="table-container" style="border-left: 4px solid #f97316;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Máquina</th>
+                    <th>Estado</th>
+                    <th>Tipo Medida</th>
+                    <th>Valor Actual</th>
+                    <th>Próximo Mantenimiento</th>
+                    <th>Acción Inmediata</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for alerta in alertas_mantenimiento %}
+                <tr>
+                    <td>
+                        <strong style="color: white; font-size: 1.1rem;">{{ alerta.id_interno }}</strong>
+                    </td>
+                    <td>
+                        <span class="status-badge" style="background: rgba(249,115,22,0.2); color:#fdba74;">
+                            {{ alerta.get_estado_display }}
+                        </span>
+                    </td>
+                    <td>{{ alerta.get_unidad_medida_display }}</td>
+                    <td style="color: #cbd5e1; font-weight: bold;">{{ alerta.valor_actual_medida }}</td>
+                    <td style="color: #fca5a5; font-weight: bold;">{{ alerta.proximo_mantenimiento }}</td>
+                    <td>
+                        <a href="{% url 'taller_create_ot' %}?maquina={{ alerta.id }}" class="btn-submit btn-success" style="padding: 0.5rem 1rem; font-size: 0.85rem; text-decoration: none; background: #f97316;">Abrir O.T. ➔</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+</div>
+{% endif %}
+
+<!-- PANEL 1: Órdenes Activas en Taller -->
+<div class="dashboard-panel">
+    <h2>En Reparación Activa</h2>
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th><a href="#" style="color: inherit; text-decoration: none;">ID OT</a></th>
+                    <th><a href="#" style="color: inherit; text-decoration: none;">Fecha Ingreso</a></th>
+                    <th><a href="#" style="color: inherit; text-decoration: none;">Máquina</a></th>
+                    <th><a href="#" style="color: inherit; text-decoration: none;">Mecánico</a></th>
+                    <th><a href="#" style="color: inherit; text-decoration: none;">Tipo Falla</a></th>
+                    <th><a href="#" style="color: inherit; text-decoration: none;">Motivo Relatado</a></th>
+                    <th><a href="#" style="color: inherit; text-decoration: none;">Cambiar Estado Rápido</a></th>
+                    <th>Acciones / Cierre</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ot in ordenes_activas %}
+                <tr>
+                    <td style="font-weight: 600; color: var(--accent-glow);">#{{ ot.id }}</td>
+                    <td>{{ ot.fecha_ingreso|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <div class="maquina-info">
+                            <span class="maquina-id">{{ ot.maquina.id_interno }}</span>
+                            <span class="maquina-tipo" style="font-size: 0.75rem; color: #94a3b8; display: block;">{{ ot.maquina.get_tipo_display }}</span>
+                        </div>
+                    </td>
+                    <td><span class="mecanico" style="color: #cbd5e1;"><i class="icon" style="font-size: 0.8rem;">🔧</i> {% if ot.mecanico %}{{ ot.mecanico.username|upper }}{% else %}NO ASIGNADO{% endif %}</span></td>
+                    <td><span class="status-badge tipo-{{ ot.tipo_mantenimiento|lower|slice:':10' }}">{{ ot.get_tipo_mantenimiento_display }}</span></td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ ot.descripcion_falla }}">{{ ot.descripcion_falla }}</td>
+                    
+                    <td>
+                        <!-- Formulario ultra-rápido para cambiar de estado al vuelo -->
+                        <form method="post" action="{% url 'taller_update_estado' ot.id %}" class="estado-form">
+                            {% csrf_token %}
+                            <select name="estado" class="estado-select">
+                                <option value="EN_PROCESO" {% if ot.estado == 'EN_PROCESO' %}selected{% endif %}>🟢 En Proceso</option>
+                                <option value="ESPERANDO_REPUESTO" {% if ot.estado == 'ESPERANDO_REPUESTO' %}selected{% endif %}>🔴 Esperando Repuesto</option>
+                            </select>
+                            <button type="submit" class="btn-update" title="Actualizar Estado">Guardar</button>
+                        </form>
+                    </td>
+                    
+                    <td class="actions-cell">
+                        <a href="{% url 'taller_close_ot' ot.id %}" class="btn-icon check" title="Finalizar e Informar Reseteo">
+                            <span class="icon">✅ CERRAR REPARACIÓN</span>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="empty-state">
+                        <div class="empty-content">
+                            <span class="empty-icon">🎉</span>
+                            <p>Taller Vacío.</p>
+                            <span class="empty-subtext">Todas las máquinas están 100% operativas o no hay reparaciones pendientes.</span>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<!-- PANEL 2: Historial de Órdenes Finalizadas -->
+<div class="dashboard-panel" style="margin-top: 3rem;">
+    <h2>Historial de Equipos Dados de Alta (Últimos 50)</h2>
+    <div class="table-container" style="opacity: 0.85;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID OT</th>
+                    <th>Máquina</th>
+                    <th>Tipo</th>
+                    <th>Mecánico</th>
+                    <th>Fecha Ingreso</th>
+                    <th>Fecha Alta (Cierre)</th>
+                    <th>Trabajo Efectuado</th>
+                    <th>Estado de Cierre</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ot in ordenes_historial %}
+                <tr>
+                    <td style="font-weight: 500; color: #64748b;">#{{ ot.id }}</td>
+                    <td><strong>{{ ot.maquina.id_interno }}</strong></td>
+                    <td><span class="status-badge tipo-{{ ot.tipo_mantenimiento|lower|slice:':10' }}">{{ ot.get_tipo_mantenimiento_display }}</span></td>
+                    <td>{% if ot.mecanico %}{{ ot.mecanico.username|upper }}{% else %}-{% endif %}</td>
+                    <td>{{ ot.fecha_ingreso|date:"d/m/Y H:i" }}</td>
+                    <td style="color: #2dd4bf;">{{ ot.fecha_salida|date:"d/m/Y H:i" }}</td>
+                    <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ ot.trabajo_realizado }}">{{ ot.trabajo_realizado }}</td>
+                    <td><span class="status-badge estado-finalizado">✅ DADA DE ALTA</span></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="empty-state">
+                        <div class="empty-content">
+                            <span class="empty-icon">📝</span>
+                            <p>Aún no hay historial de reparaciones finalizadas.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

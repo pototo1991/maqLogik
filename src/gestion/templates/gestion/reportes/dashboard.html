@@ -1,0 +1,91 @@
+{% extends 'gestion/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'gestion/css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'gestion/css/reportes.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="header-actions" style="margin-bottom: 2rem;">
+    <h1 style="color: white; margin: 0;">📑 Centro de Reportería</h1>
+    <p style="color: #94a3b8; font-size: 1.1rem; margin-top: 5px;">Genere documentos PDF para auditoría y control de gestión.</p>
+</div>
+
+{% if error %}
+<div class="alert alert-danger" style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #fca5a5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    ⚠️ {{ error }}
+</div>
+{% endif %}
+
+<div class="report-grid">
+    
+    <!-- Reporte 1: Actividad Terreno -->
+    <div class="report-card card-terreno">
+        <div class="report-icon">🚜</div>
+        <h3>Reporte Diario de Terreno</h3>
+        <p>Consolidado de todas las Órdenes de Trabajo cerradas y Checklists cursados en un rango de fechas. Ideal para validar la asistencia y producción del parque de máquinas.</p>
+        
+        <form action="{% url 'generar_pdf' 'actividad_terreno' %}" method="get" target="_blank">
+            <div class="report-filters">
+                <label>Desde:</label>
+                <input type="date" name="fecha_inicio" value="{{ fecha_hoy }}" required>
+                
+                <label>Hasta:</label>
+                <input type="date" name="fecha_fin" value="{{ fecha_hoy }}" required>
+            </div>
+            <button type="submit" class="btn-download">💾 Generar PDF</button>
+        </form>
+    </div>
+
+    <!-- Reporte 2: Historial Clínico (Taller) -->
+    <div class="report-card card-taller">
+        <div class="report-icon">⚙️</div>
+        <h3>Historial Clínico (Taller)</h3>
+        <p>Extrae la hoja de vida completa de una máquina específica. Detalla todos los ingresos a taller, mantenimientos preventivos y correctivos realizados.</p>
+        
+        <form action="{% url 'generar_pdf' 'historial_clinico' %}" method="get" target="_blank">
+            <div class="report-filters">
+                <label>Seleccionar Máquina:</label>
+                <select name="maquina_id" required>
+                    <option value="" disabled selected>-- Elija una máquina --</option>
+                    {% for m in maquinas %}
+                    <option value="{{ m.id }}">{{ m.id_interno }} - {{ m.tipo|default:"General" }}</option>
+                    {% endfor %}
+                </select>
+                
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <label>Desde:</label>
+                        <input type="date" name="fecha_inicio" value="{{ fecha_inicio_mes }}">
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Hasta:</label>
+                        <input type="date" name="fecha_fin" value="{{ fecha_hoy }}">
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn-download">💾 Generar PDF</button>
+        </form>
+    </div>
+
+    <!-- Reporte 3: Rendimiento de Combustible -->
+    <div class="report-card card-combustible">
+        <div class="report-icon">⛽</div>
+        <h3>Control de Combustible</h3>
+        <p>Compara el consumo de litros de las recargas frente a la productividad de las máquinas. Filtre por mes para calcular mermas y costos operativos.</p>
+        
+        <form action="{% url 'generar_pdf' 'rendimiento_combustible' %}" method="get" target="_blank">
+            <div class="report-filters">
+                <label>Desde:</label>
+                <input type="date" name="fecha_inicio" value="{{ fecha_inicio_mes }}" required>
+                
+                <label>Hasta:</label>
+                <input type="date" name="fecha_fin" value="{{ fecha_hoy }}" required>
+            </div>
+            <button type="submit" class="btn-download">💾 Generar PDF</button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

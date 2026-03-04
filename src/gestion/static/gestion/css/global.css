@@ -1,0 +1,108 @@
+/* Variables Globales (Sistema de Diseño) */
+:root {
+    /* Paleta Premium (Modo Oscuro Elegante/Corporativo) */
+    --color-bg-primary: #0B0E14; /* Fondo muy oscuro, ligeramente azulado */
+    --color-bg-secondary: #151A23; /* Panel oscuro */
+    --color-brand: #00E676; /* Verde Esmeralda neón (Contraste alto) */
+    --color-brand-hover: #00C853;
+    --color-brand-glow: rgba(0, 230, 118, 0.4);
+    
+    --color-text-main: #FFFFFF;
+    --color-text-muted: #9BA3B5;
+    
+    --color-error: #FF3D00;
+    --color-error-glow: rgba(255, 61, 0, 0.2);
+    
+    --font-family-main: 'Inter', system-ui, -apple-system, sans-serif;
+    
+    /* Variables de Estructura */
+    --radius-lg: 16px;
+    --radius-md: 8px;
+    
+    /* Glassmorphism */
+    --glass-bg: rgba(21, 26, 35, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family-main);
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-main);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Clases Híbridas (Glassmorphism) */
+.p-glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow);
+}
+
+/* Botonería Global */
+.btn-primary {
+    background: var(--color-brand);
+    color: #000;
+    font-weight: 600;
+    border: none;
+    padding: 14px 24px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    font-size: 1rem;
+    box-shadow: 0 4px 15px var(--color-brand-glow);
+}
+
+.btn-primary:hover {
+    background: var(--color-brand-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--color-brand-glow);
+}
+
+/* Alertas Standar */
+.alert-box {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.alert-box.success {
+    background: var(--color-brand-glow);
+    border-color: var(--color-brand);
+}
+
+.alert-box.error {
+    background: var(--color-error-glow);
+    border-color: var(--color-error);
+}
+
+.alert-box.warning {
+    background: rgba(255, 193, 7, 0.2);
+    border-color: #FFC107;
+}
+
+.alert-box.info {
+    background: rgba(33, 150, 243, 0.2);
+    border-color: #2196F3;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
