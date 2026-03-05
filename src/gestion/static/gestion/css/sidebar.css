@@ -165,3 +165,71 @@
     margin: 0 auto;
     width: 100%;
 }
+
+/* ==============================================================
+   DISEÑO RESPONSIVE (MÓVILES Y PANTALLAS PEQUEÑAS)
+   ============================================================== */
+@media (max-width: 768px) {
+    .dash-body {
+        flex-direction: column;
+        overflow-y: auto; /* Permitir scroll global en móvil */
+    }
+
+    /* Convertir barra lateral a cabecera superior compacta */
+    .sidebar {
+        width: 100%;
+        height: auto;
+        min-height: auto;
+        border-bottom: 1px solid var(--glass-border);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    
+    .sidebar-header {
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .sidebar-header .tenant-name {
+        margin: 0;
+    }
+    
+    /* Mostrar menús en fila con scroll horizontal para navegación rápida */
+    .sidebar-nav {
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 10px 15px;
+        gap: 10px;
+        white-space: nowrap;
+        background: rgba(11, 14, 20, 0.95);
+    }
+    
+    .nav-item {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .nav-item .icon {
+        margin-right: 6px;
+    }
+
+    /* Ajustar contentido principal */
+    .main-content {
+        overflow-y: visible; /* El scroll lo maneja dash-body ahora */
+    }
+
+    .topbar {
+        padding: 0 15px;
+        height: 60px;
+    }
+
+    /* Ocultar barra de búsqueda en celular para ganar espacio */
+    .topbar-search {
+        display: none;
+    }
+
+    .content-wrapper {
+        padding: 20px 15px;
+    }
+}

@@ -38,8 +38,8 @@
         
         <nav class="sidebar-nav">
         <nav class="sidebar-nav">
-            <!-- Panel de Control SaaS (Solo Root). Va de primero -->
-            {% if request.user.is_superuser %}
+            <!-- Panel de Control SaaS (Solo Root). Va de primero y se oculta si se está simulando -->
+            {% if request.user.is_superuser and 'impersonate_empresa_id' not in request.session %}
             <a href="{% url 'root_dashboard' %}" class="nav-item {% if 'root' in request.resolver_match.url_name %}active{% endif %}" style="background-color: rgba(16, 185, 129, 0.1); border-left: 3px solid #10b981; margin-bottom: 20px;">
                 <i class="icon">👑</i> ADMIN SaaS
             </a>
@@ -118,8 +118,10 @@
         <!-- Topbar Horizontal -->
         <header class="topbar">
             <div class="topbar-search">
-                <form action="{% url 'maquina_list' %}" method="GET" style="display:flex; width:100%;">
-                    <input type="text" name="q" placeholder="Buscar máquina o patente..." class="search-input" value="{{ request.GET.q }}">
+                <form action="{% if request.resolver_match.url_name == 'root_dashboard' %}{% url 'root_dashboard' %}{% else %}{% url 'maquina_list' %}{% endif %}" method="GET" style="display:flex; width:100%;">
+                    <input type="text" name="q" 
+                           placeholder="{% if request.resolver_match.url_name == 'root_dashboard' %}Buscar empresa, nombre o RUT...{% else %}Buscar máquina o patente...{% endif %}" 
+                           class="search-input" value="{{ request.GET.q }}">
                 </form>
             </div>
             

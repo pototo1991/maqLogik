@@ -11,7 +11,9 @@ def web_login(request):
     Usa sesiones tradicionales en lugar de JWT (El cual es solo para API Móvil).
     """
     if request.user.is_authenticated:
-        return redirect('dashboard') # Redirigir si ya está logueado
+        if request.user.is_superuser:
+            return redirect('root_dashboard')
+        return redirect('dashboard')
         
     if request.method == 'POST':
         rut_usuario = request.POST.get('username')
@@ -21,7 +23,12 @@ def web_login(request):
         if user is not None:
             login(request, user)
             logger.info(f"AUDITORÍA - Login Web Exitoso: Usuario '{user.username}' ({user.get_rol_display()}) de la empresa '{user.empresa.nombre_fantasia if user.empresa else 'System Admin'}'.")
-            return redirect('dashboard')
+            
+            # Redirección inteligente basada en rol
+            if user.is_superuser:
+                return redirect('root_dashboard')
+            else:
+                return redirect('dashboard')
         else:
             logger.warning(f"AUDITORÍA - Intento fallido de Login Web: Credenciales inválidas para el rut: '{rut_usuario}'. IP: {request.META.get('REMOTE_ADDR')}")
             messages.error(request, 'Usuario o contraseña incorrectos.')

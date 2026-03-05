@@ -1,0 +1,69 @@
+# 🏗️ MaqLogik: Modelos de Despliegue y Arquitectura Comercial
+
+Al estar construido sobre contenedores **Docker**, MaqLogik tiene una ventaja técnica enorme: corre exactamente igual en un servidor de 10.000 USD de Amazon, que en un computador de escritorio de una minera. Esto te permite ofrecer tu software bajo dos modelos comerciales distintos, abarcando tanto a empresas modernas como a corporaciones tradicionales con políticas de seguridad estrictas (paranoicas).
+
+---
+
+## ☁️ MODELO 1: Cloud SaaS (Software as a Service)
+**El modelo moderno y escalable. Tú controlas todo desde la Nube (Knossos o AWS).**
+
+### 📍 ¿Cómo funciona?
+Tú alojas la base de datos MySQL, el servidor de tareas (Celery/Redis) y el cerebro (Django/Nginx) en un servidor tuyo conectado a internet 24/7 (como tu actual servidor Knossos u océanos como AWS/DigitalOcean). Las empresas solo entran a una URL (ej: `app.maqlogik.cl`) con un usuario y contraseña.
+
+> **Resumen Visual del Flujo de Datos:**  
+> `Celular (4G)` ➔ `Dominio DNS` ➔ `Cloudflare (Seguridad Global)` ➔ **[TÚNEL SEGURO]** ➔ `cloudflared (en Knossos)` ➔ `Nginx (Balanceador)` ➔ `Gunicorn (Clonador)` ➔ `Django (Cerebro)` ➔ `MySQL (Memoria)`
+
+### 🌐 Conectividad Abierta (Lo que SÍ hace)
+- **Celulares en Terreno (4G/5G):** Los operadores usan los datos móviles de su celular para enviar checklists y fotos desde cualquier faena con cobertura.
+- **Acceso Global:** El gerente de la empresa puede ver el dashboard desde su casa en Santiago, mientras la maquinaria trabaja en Antofagasta.
+- **GPS y Telemetría en Tiempo Real:** Como hay internet, el celular "late" enviando su posición a cada rato. Puedes dibujar el rastro del camión en el mapa maestro de Knossos en tiempo real.
+- **Multi-Tenant Activo:** Un solo servidor físico tuyo (Knossos) atiende a docenas de empresas distintas simultáneamente. Cada una con sus permisos aislados mediante el [EmpresaMiddleware](file:///c:/Users/Walter/Documents/proyectos/MaqLogik/src/gestion/middleware.py#8-47) que ya construimos.
+- **Túneles Seguros:** Se puede usar **Cloudflare Tunnels** o **Tailscale** para blindar la conexión contra ataques DDoS sin abrir puertos en tu router doméstico/oficina.
+
+### ❌ Limitaciones (Lo que NO hace o donde sufre)
+- **Patios Sin Señal ("Zonas Oscuras"):** Si la faena no tiene 3G/4G, el modelo Cloud dependerá 100% de que programemos el **Modo Offline (PWA)**. El operador llenará el checklist sin señal y la app retendrá los datos en el teléfono hasta detectar internet para "escupirlos" al servidor.
+- **Dependencia a Terceros:** Si a tu proveedor de internet (vISP) o a Cloudflare se les cae la red, MaqLogik se apaga para todos tus clientes simultáneamente.
+
+### 💰 Modelo de Negocio (Cómo Cobrar)
+- **Suscripción Recurrente:** Cobras una mensualidad fija (MRR) por tramos. Ej: "Plan Básico: Hasta 5 máquinas. Plan Pro: 20 máquinas".
+- **Sin Costo Inicial Cero para el Cliente:** El cliente no tiene que comprar servidores ni routers caros. Simplemente les das una URL y empiezan a usarlo. Es una venta rápida.
+
+---
+
+## 🏢 MODELO 2: On-Premise (Intranet Local y Aislada)
+**El modelo corporativo militar. El cliente es el dueño absoluto de sus datos y su fierro (hardware).**
+
+### 📍 ¿Cómo funciona?
+Vendes una *Caja Negra* o una *Licencia de Instalación*. Llevas en un pendrive (o descargas por SSH) la carpeta Docker de MaqLogik y la instalas dentro de un servidor físico de la propia empresa que contrató el servicio. Este servidor se enchufa directamente al Router principal que alimenta la faena o el taller mecánico. Ojo: Puede que este servidor NO ESTÉ conectado a internet, pero SÍ a la red LAN (Intranet).
+
+### 🛡️ Aislamiento Total (Lo que SÍ hace)
+- **Sin Internet Público:** No existe el dominio `app.maqlogik.cl`. Los mecánicos en el taller escriben la IP interna local (ej: `http://192.168.1.50:8000`) o un nombre de red cerrado (`http://server-maqlogik`).
+- **Supervivencia Absoluta (Offline-Faena):** Mientras los operadores y mecánicos estén conectados físicamente al Wi-Fi de la faena o campamento (aunque ese campamento no tenga acceso al exterior), el sistema es 100% veloz y respondible. La base de datos vive a unos metros de ellos.
+- **Cero Latencia:** Las fotos suben en milisegundos y los reportes PDF se generan instantáneamente.
+- **Privacidad Corporativa:** Imposible que un hacker ruso entre desde internet, porque el sistema literalmente no existe fuera del edificio del cliente.
+
+### ❌ Limitaciones (Lo que NO hace o donde sufre)
+- **Cero Telemetría GPS Externa:** Si los camiones salen a la carretera pública, la app en el celular perderá conexión con el servidor interno y NO podrá enviar el trazado GPS en vivo. Tendrás que apagar el módulo GPS para ese cliente.
+- **El Gerente Ciego:** Si el gerente viaja a su casa, no podrá ver MaqLogik, a menos que la empresa minera tenga contratado una "VPN Corporativa" (ej: Fortinet/Cisco) para que el gerente "entre" a la red de la faena virtualmente.
+- **Actualizaciones Difíciles (Para Ti):** Si construyes una nueva función en MaqLogik versión 2.0, tendrás que viajar físicamente (o conectarte por TeamViewer a escondidas) al servidor de cada cliente On-Premise para hacer `git pull` y actualizarles Docker. No es automático.
+
+### 💰 Modelo de Negocio (Cómo Cobrar)
+- **Licencia Inicial Fuerte (One-Time):** Cobras un monto alto inicial por instalar tu software "para toda la vida" en su máquina. (Ej: \$5.000 a \$10.000 USD de entrada).
+- **Mantenimiento Anual (SLA):** Cobras un FEE anual del 15% o 20% del valor de la licencia inicial por "derecho a actualizaciones y soporte técnico" si se les rompe el Docker.
+
+---
+
+## 📊 Resumen Ejecutivo Comparativo
+
+| Característica | ☁️ Cloud SaaS (Knossos) | 🏢 On-Premise (Local Faena) |
+| :--- | :--- | :--- |
+| **Público Objetivo** | Pymes, Talleres medianos, Empresas ágiles. | Mineras grandes, Corporaciones con ISMS (ISO 27001). |
+| **Velocidad de Venta** | Muy rápida. (Contrato digital listo). | Lenta. (Requiere aprobación del área de Redes/IT del cliente). |
+| **Responsabilidad Caídas** | **Tuya** (Tienes que revivir Knossos a las 3 AM). | **Del Cliente** (Si se les corta la luz, es problema de ellos). |
+| **Conexión de Operadores** | 4G / 5G (Consumen su plan de datos). | Wi-Fi Interno de la faena (Cero consumo de datos propios). |
+| **Tracking GPS Móvil** | Excelente y en tiempo real. | Nulo si salen del campamento (solo sirve para registrar el último parqueo). |
+| **Actualizaciones Códigos** | Centralizada por ti y al instante para todos. | Lenta, requiere actualizar manualmente a cliente por cliente. |
+
+> [!TIP]
+> **Mi recomendación como Arquitecto de Software:** 
+> Comienza vendiendo tu **Modelo Cloud SaaS** alojado en Knossos (usando Cloudflare Tunnels para exponerlo a clientes cuando finalices el código móvil). Es más rentable a largo plazo, escalable, y tú controlas el código fuente. Reserva el **Modelo On-Premise** exclusivamente como una carta bajo la manga para clientes corporativos inmensos (ballenas) dispuestos a pagarte decenas de miles de dólares por una instalación "llave en mano" aislada.

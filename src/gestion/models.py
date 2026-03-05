@@ -28,6 +28,7 @@ class Empresa(models.Model):
     nombre_fantasia = models.CharField(max_length=100)
     rut_empresa = models.CharField(max_length=20, unique=True)
     usa_despachador = models.BooleanField(default=False)
+    activa = models.BooleanField(default=True, help_text="Soft Delete: Define si la empresa tiene acceso al sistema.")
     
     # --- FEATURE FLAGS SAAS (Modulos Contratados) ---
     modulo_mantencion = models.BooleanField(default=False, help_text="Taller y Mantenimiento")

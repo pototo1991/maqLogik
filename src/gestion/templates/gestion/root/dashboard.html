@@ -11,13 +11,6 @@
         <h1 class="page-title">Panel de Administración Maestro (SaaS)</h1>
         <div class="date-display">{{ total_empresas }} Clientes Activos Globales</div>
     </div>
-    <div class="user-profile" style="margin-right: 20px;">
-        <div class="user-avatar" style="background: linear-gradient(135deg, #10b981, #047857);">ADMIN</div>
-        <div class="user-info">
-            <span class="user-name">{{ request.user.get_full_name|default:request.user.username }}</span>
-            <span class="user-role">Superusuario MaqLogik</span>
-        </div>
-    </div>
 </div>
 
 <div class="machines-grid">
@@ -91,6 +84,16 @@
 
         <hr class="hr-divider">
         <hr class="hr-divider">
+        <div class="user-info" style="margin-bottom: 15px;">
+            <a href="{% url 'root_toggle_empresa_status' empresa.id %}" 
+               class="btn-card-action" 
+               style="width: 100%; border: 1px solid {% if empresa.activa %}#ef4444{% else %}#10b981{% endif %}; color: {% if empresa.activa %}#ef4444{% else %}#10b981{% endif %}; background: {% if empresa.activa %}rgba(239, 68, 68, 0.1){% else %}rgba(16, 185, 129, 0.1){% endif %};"
+               onclick="return confirm('¿Estás seguro de que deseas {% if empresa.activa %}DESHABILITAR{% else %}HABILITAR{% endif %} esta cuenta corporativa? Esto afectará a todos sus usuarios en tiempo real.');">
+                <i class="icon">{% if empresa.activa %}🛑{% else %}✅{% endif %}</i>
+                <span>{% if empresa.activa %}Suspender Cuenta Comercial{% else %}Reactivar Cuenta Comercial{% endif %}</span>
+            </a>
+        </div>
+        
         <div class="btn-group-3">
             <a href="{% url 'root_impersonate' empresa.id %}" class="btn-card-action" style="border: 1px solid var(--accent); color: var(--accent);">
                 <i class="icon">👁️</i>

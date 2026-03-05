@@ -2,6 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from ..models import Empresa
+import logging
+
+logger = logging.getLogger('gestion')
 
 def is_superadmin(user):
     """ Verifica que el usuario tenga privilegios de Root SaaS """
@@ -44,16 +47,21 @@ def root_create_empresa(request):
                     nuevo_owner.rol = 'OWNER'
                     nuevo_owner.save()
                     
+                logger.info(f"AUDITORÍA - Nueva Empresa SaaS Creada: '{nueva_empresa.nombre_fantasia}' (RUT: {nueva_empresa.rut_empresa}) por el administrador {request.user.username}.")
                 messages.success(request, f"¡Empresa {nueva_empresa.nombre_fantasia} creada con éxito y Owner asignado!")
                 return redirect('root_dashboard')
             except Exception as e:
-                messages.error(request, f"Error al crear Empresa/Owner: {str(e)}")
+                logger.error(f"AUDITORÍA - EXCEPCIÓN DB AL CREAR EMPRESA: {str(e)}")
+                messages.error(request, f"Error interno al crear Empresa/Owner: {str(e)}")
         else:
             errors_msg = "Revise: "
             if form_empresa.errors:
                 errors_msg += f"Empresa: {form_empresa.errors.as_text()} | "
             if form_owner.errors:
                 errors_msg += f"Owner: {form_owner.errors.as_text()}"
+            
+            # Formateando y enviando los errores exactos a los logs del archivo app_control.log
+            logger.warning(f"AUDITORÍA - Falla de validación de Formulario al crear empresa: {errors_msg.replace('  ', ' ')}")
             messages.error(request, errors_msg)
     else:
         form_empresa = EmpresaForm()
@@ -141,4 +149,30 @@ def root_stop_impersonate(request):
     if 'impersonate_empresa_id' in request.session:
         del request.session['impersonate_empresa_id']
         messages.success(request, "Has regresado al Panel de Control Maestro (SaaS).")
+    return redirect('root_dashboard')
+
+@user_passes_test(is_superadmin, login_url='/')
+def root_toggle_empresa_status(request, empresa_id):
+    """ 
+    Invierte el estado de 'activa' de una empresa (Soft Delete/Restore).
+    También desactiva masivamente todos los usuarios asociados para denegar logins,
+    excluyendo expresamente a los superusuarios.
+    """
+    empresa = get_object_or_404(Empresa, pk=empresa_id)
+    usuarios_empresa = Usuario.objects.filter(empresa=empresa)
+    
+    # Toggle del booleano
+    nuevo_estado = not empresa.activa
+    empresa.activa = nuevo_estado
+    empresa.save()
+
+    # Actualizar is_active forzosamente a todos los empleados conectados a la empresa
+    # EXCEPTO al panel maestro / superusuarios para evitar bloqueos del sistema.
+    usuarios_empresa.exclude(is_superuser=True).update(is_active=nuevo_estado)
+
+    # Mensajes UI
+    accion = "Habilitada" if nuevo_estado else "Deshabilitada (Soft Delete aplicado)"
+    color = messages.success if nuevo_estado else messages.warning
+    color(request, f"La empresa {empresa.nombre_fantasia} fue {accion}.")
+    
     return redirect('root_dashboard')

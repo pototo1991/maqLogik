@@ -1,6 +1,25 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import Maquinaria, Usuario, Checklist, OrdenTrabajo, CompraCombustible, CombustibleLog, OrdenTaller, Empresa
+import re
+
+def validar_rut_chileno(rut_str):
+    if not rut_str: return False
+    rut_str = rut_str.replace('.', '').replace('-', '').upper()
+    if len(rut_str) < 2 or not rut_str[:-1].isdigit():
+        return False
+    rut_num = rut_str[:-1]
+    dv_dado = rut_str[-1]
+    suma = 0
+    multiplo = 2
+    for c in reversed(rut_num):
+        suma += int(c) * multiplo
+        multiplo += 1
+        if multiplo == 8:
+            multiplo = 2
+    esperado = 11 - (suma % 11)
+    dv_esp = '0' if esperado == 11 else 'K' if esperado == 10 else str(esperado)
+    return dv_dado == dv_esp
 
 class EmpresaForm(forms.ModelForm):
     class Meta:
@@ -30,6 +49,13 @@ class EmpresaForm(forms.ModelForm):
             'modulo_gps': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
             'modulo_reporteria': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
         }
+
+    def clean_rut_empresa(self):
+        rut = self.cleaned_data.get('rut_empresa')
+        if rut:
+            if not validar_rut_chileno(rut):
+                raise forms.ValidationError('El RUT de la empresa ingresado no es válido matemáticamente.')
+        return rut
 
 class MaquinariaForm(forms.ModelForm):
     class Meta:
@@ -109,11 +135,10 @@ class UsuarioCreationForm(UserCreationForm):
         })
 
     def clean_rut(self):
-        import re
         rut = self.cleaned_data.get('rut')
         if rut:
-            if not re.match(r'^[0-9]{7,8}-[0-9Kk]{1}$', rut):
-                raise forms.ValidationError('El RUT debe tener el formato con guión, Ej: 12345678-9')
+            if not validar_rut_chileno(rut):
+                raise forms.ValidationError('El RUT de usuario ingresado no es válido matemáticamente (Dígito Verificador incorrecto).')
         return rut
 
 class UsuarioUpdateForm(forms.ModelForm):
@@ -131,11 +156,10 @@ class UsuarioUpdateForm(forms.ModelForm):
         }
 
     def clean_rut(self):
-        import re
         rut = self.cleaned_data.get('rut')
         if rut:
-            if not re.match(r'^[0-9]{7,8}-[0-9Kk]{1}$', rut):
-                raise forms.ValidationError('El RUT debe tener el formato con guión, Ej: 12345678-9')
+            if not validar_rut_chileno(rut):
+                raise forms.ValidationError('El RUT de usuario ingresado no es válido matemáticamente (Dígito Verificador incorrecto).')
         return rut
 
 class ChecklistForm(forms.ModelForm):

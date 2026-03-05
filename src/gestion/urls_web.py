@@ -52,6 +52,7 @@ urlpatterns = [
     path('root/nueva/', views.root_create_empresa, name='root_create_empresa'),
     path('root/empresa/<int:empresa_id>/modulos/', views.root_edit_modules, name='root_edit_modules'),
     path('root/empresa/<int:empresa_id>/owner/', views.root_manage_owner, name='root_manage_owner'),
+    path('root/empresa/<int:empresa_id>/toggle-status/', views.root_toggle_empresa_status, name='root_toggle_empresa_status'),
     
     # --- Impersonation (Ver como Cliente) ---
     path('root/empresa/<int:empresa_id>/impersonate/', views.root_impersonate, name='root_impersonate'),
