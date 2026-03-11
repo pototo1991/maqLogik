@@ -152,7 +152,8 @@ class OrdenTrabajo(models.Model):
     def clean(self):
         super().clean()
         # Validación de reglas de negocio SOLO para creación o salida de ruta (No para retornos)
-        if not self.pk:
+        # Solo ejecutamos si tenemos una máquina asignada, para evitar RelatedObjectDoesNotExist en forms vacíos
+        if not self.pk and hasattr(self, 'maquina_id') and self.maquina_id:
             hace_12_horas = timezone.now() - timedelta(hours=12)
             ultimo_checklist = Checklist.objects.filter(
                 maquina=self.maquina,

@@ -167,7 +167,12 @@ def taller_update_estado(request, pk):
             orden.save(update_fields=['estado'])
             logger.info('OT TALLER ID=%s cambio estado a %s. Usuario=%s. Empresa=%s.',
                         pk, nuevo_estado, request.user.username, request.empresa.id)
-            messages.success(request, f'Estado de Equipo actualizado a: {orden.get_estado_display()}')
+            messages.success(request, f'Estado actualizado a: {orden.get_estado_display()}')
+            
+            # Soporte HTMX: Si es un llamado asíncrono, devolver solo el partial HTML de esa "Card"
+            if request.headers.get('HX-Request'):
+                return render(request, 'gestion/taller/partials/ot_card_content.html', {'ot': orden})
+                
     return redirect('taller_dashboard')
 
 @login_required(login_url='web_login')

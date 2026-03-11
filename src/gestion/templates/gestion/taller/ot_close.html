@@ -4,13 +4,13 @@
 {% block title %}Finalizar Orden de Taller{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'gestion/css/root.css' %}">
 <link rel="stylesheet" href="{% static 'gestion/css/taller.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="header">
-    <div class="header-info">
-        <a href="{% url 'taller_dashboard' %}" class="btn-card-action btn-card-secondary" style="margin-bottom: 10px; display: inline-block; padding: 4px 12px; border-radius: 4px;">&larr; Volver al Taller</a>
+    <div class="header-info" style="max-width: 800px; margin: 0 auto;">
         <h1 class="page-title">Cierre Clínico OT #{{ orden.id }}</h1>
         <div class="date-display">Fin de reparaciones para Máquina: <strong>{{ orden.maquina.id_interno }}</strong> - {{ orden.maquina.patente }}</div>
     </div>
@@ -70,11 +70,9 @@
             {% endfor %}
         </div>
         
-        <div class="bottom-action-bar" style="position: static; box-shadow: none; margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); padding: 20px 0 0 0;">
-            <a href="{% url 'taller_dashboard' %}" class="btn-card-action btn-card-secondary" style="padding: 12px 24px;">Cancelar</a>
-            <button type="submit" class="btn btn-primary btn-large-rounded" style="background: linear-gradient(135deg, #10b981, #059669); border: none;">
-                <i class="icon">✅</i> Procesar Cierre y Liberar Equipo
-            </button>
+        <div class="form-actions-bar">
+            <a href="{% url 'taller_dashboard' %}" class="btn-form-cancel">← Cancelar</a>
+            <button type="submit" class="btn-form-save">✅ Procesar Cierre y Liberar Equipo</button>
         </div>
     </form>
 </div>

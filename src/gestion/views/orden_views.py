@@ -99,9 +99,24 @@ def orden_create(request):
     else:
         form = OrdenTrabajoSalidaForm(empresa=request.empresa)
         
+    # Obtener el queryset de máquinas ya filtrado por el form
     maquinas = form.fields['maquina'].queryset
-    operadores_map = {m.id: m.operador_asignado.id for m in maquinas if m.operador_asignado}
-    medidas_map = {m.id: float(m.valor_actual_medida) for m in maquinas if m.valor_actual_medida is not None}
+    
+    # Manejo seguro para evitar RelatedObjectDoesNotExist
+    operadores_map = {}
+    medidas_map = {}
+    
+    for m in maquinas:
+        try:
+            # Solo agregar al map si tiene operador asignado y no es nulo
+            if getattr(m, 'operador_asignado_id', None):
+                operadores_map[m.id] = m.operador_asignado_id
+            
+            # Solo agregar al map si tiene medida no nula
+            if getattr(m, 'valor_actual_medida', None) is not None:
+                medidas_map[m.id] = float(m.valor_actual_medida)
+        except Exception as e:
+            logger.warning("Error al mapear máquina %s: %s", m.id, e)
         
     return render(request, 'gestion/ordenes/orden_form.html', {
         'form': form,

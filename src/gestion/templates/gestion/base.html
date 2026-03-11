@@ -15,6 +15,10 @@
     <link rel="stylesheet" href="{% static 'gestion/css/sidebar.css' %}">
     <!-- Select2 CSS para Dropdowns con Buscador -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    
+    <!-- HTMX para interactividad asincrónica -->
+    <script src="https://unpkg.com/htmx.org@1.9.11"></script>
+    
     {% block extra_css %}{% endblock %}
     
     <!-- Evitar parpadeos (FOUC) leyendo preferencia de Tema temprano -->
@@ -81,7 +85,7 @@
 
                 {% if request.user.is_superuser or request.user.rol == 'OWNER' or request.user.rol == 'CHIEF' or request.user.rol == 'FUEL' %}
                     {% if request.empresa.modulo_combustible %}
-                    <a href="{% url 'combustible_dashboard' %}" class="nav-item {% if 'combustible' in request.resolver_match.url_name %}active{% endif %}">
+                    <a href="{% url 'combustible_dashboard' %}" class="nav-item {% if 'combustible' in request.resolver_match.url_name or request.resolver_match.url_name == 'carga_create' or request.resolver_match.url_name == 'compra_create' %}active{% endif %}">
                         <i class="icon">⛽</i> Combustible
                     </a>
                     {% endif %}
@@ -208,5 +212,15 @@
     </script>
 
     {% block extra_js %}{% endblock %}
+    
+    <!-- Configuración HTMX / Django CSRF -->
+    <script>
+    document.body.addEventListener('htmx:configRequest', (event) => {
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrftoken) {
+            event.detail.headers['X-CSRFToken'] = csrftoken.value;
+        }
+    });
+    </script>
 </body>
 </html>

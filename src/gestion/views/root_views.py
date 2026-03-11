@@ -18,9 +18,24 @@ def root_dashboard(request):
     # KPIs Rápidos
     total_empresas = empresas.count()
     
+    # Data para Gráficos
+    empresas_activas = empresas.filter(activa=True).count()
+    empresas_inactivas = empresas.filter(activa=False).count()
+    
+    modulos_data = [
+        empresas.filter(modulo_gps=True).count(),
+        empresas.filter(modulo_mantencion=True).count(),
+        empresas.filter(modulo_combustible=True).count(),
+        empresas.filter(modulo_checklist=True).count(),
+        empresas.filter(modulo_reporteria=True).count()
+    ]
+    
     context = {
         'empresas': empresas,
         'total_empresas': total_empresas,
+        'empresas_activas': empresas_activas,
+        'empresas_inactivas': empresas_inactivas,
+        'modulos_data': modulos_data,
     }
     return render(request, 'gestion/root/dashboard.html', context)
 

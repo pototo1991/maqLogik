@@ -137,24 +137,40 @@ def carga_create(request):
 @login_required
 def api_ot_abierta(request, maquina_id):
     """
-    Retorna el ID de la última Orden de Trabajo registrada para la 
-    máquina solicitada (abierta o cerrada recién), permitiendo al frontend auto-seleccionarla.
+    Retorna contexto de la máquina para el formulario de Carga de Combustible:
+    - Última OT de trabajo (si existe)
+    - Operador asignado a la máquina (fijo) como fallback
+    - Medida actual (Horómetro/Km) registrada en la máquina
     """
     from ..models import OrdenTrabajo, Maquinaria
     
-    # Obtener el id_interno de la maquina
-    maquina = Maquinaria.objects.filter(id=maquina_id).first()
-    medida_actual = float(maquina.valor_actual_medida) if maquina and maquina.valor_actual_medida else ''
+    maquina = Maquinaria.objects.filter(id=maquina_id, empresa=request.empresa).first()
+    if not maquina:
+        return JsonResponse({'error': 'Máquina no encontrada'}, status=404)
     
-    ot_abierta = OrdenTrabajo.objects.filter(
+    medida_actual = float(maquina.valor_actual_medida) if maquina.valor_actual_medida else ''
+    unidad_label = 'Km' if maquina.unidad_medida == 'KM' else 'Hr'
+    
+    # Operador fijo asignado a la máquina (puede haber sido reasignado en una OT)
+    operador_asignado_id = maquina.operador_asignado.id if maquina.operador_asignado else None
+    
+    # Última OT de Terreno (más reciente) para auto-seleccionar en el dropdown
+    ot_reciente = OrdenTrabajo.objects.filter(
         empresa=request.empresa,
         maquina_id=maquina_id
     ).order_by('-id').first()
     
-    if ot_abierta:
-        return JsonResponse({
-            'ot_id': ot_abierta.id,
-            'operador_id': ot_abierta.operador.id if ot_abierta.operador else None,
-            'medida_actual': medida_actual
-        })
-    return JsonResponse({'ot_id': None, 'operador_id': None, 'medida_actual': medida_actual})
+    # El operador de la última OT tiene prioridad sobre el asignado fijo
+    operador_id_final = None
+    if ot_reciente and ot_reciente.operador:
+        operador_id_final = ot_reciente.operador.id
+    else:
+        operador_id_final = operador_asignado_id
+    
+    return JsonResponse({
+        'ot_id': ot_reciente.id if ot_reciente else None,
+        'operador_id': operador_id_final,
+        'medida_actual': medida_actual,
+        'unidad_label': unidad_label,  # 'Km' o 'Hr' para mostrar en el placeholder
+    })
+

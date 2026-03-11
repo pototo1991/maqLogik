@@ -32,45 +32,8 @@
             {% if ordenes_activas %}
                 <div class="ot-list">
                 {% for ot in ordenes_activas %}
-                    <div class="ot-card">
-                        <div class="ot-header">
-                            <div class="ot-title">OT #{{ ot.id }} - Máquina {{ ot.maquina.id_interno }}</div>
-                            <div class="ot-status status-{{ ot.estado|lower }}">{{ ot.get_estado_display }}</div>
-                        </div>
-                        <div class="ot-details">
-                            <div><strong>Tipo:</strong> {{ ot.get_tipo_mantenimiento_display }}</div>
-                            <div><strong>Ingreso:</strong> {{ ot.fecha_ingreso|date:"d M Y, H:i" }}</div>
-                            <div><strong>Mecánico:</strong> {{ ot.mecanico.get_full_name|default:ot.mecanico.username|default:"No asignado" }}</div>
-                            <div><strong>Horómetro/Km:</strong> {{ ot.medida_ingreso }}</div>
-                        </div>
-                        <div style="font-size: 0.85rem; color: #d1d5db; margin-bottom: 15px;">
-                            <strong>Reporte Falla:</strong> {{ ot.descripcion_falla|truncatechars:100 }}
-                        </div>
-                        
-                        <div class="ot-actions">
-                            {% if ot.estado == 'EN_PROCESO' %}
-                            <form method="post" action="{% url 'taller_update_estado' ot.id %}" style="flex:1;">
-                                {% csrf_token %}
-                                <input type="hidden" name="estado" value="ESPERANDO_REPUESTO">
-                                <button type="submit" class="btn-ot-action btn-warning-outline" style="width: 100%;">
-                                    <i class="icon">⏳</i> Pausa (Repuestos)
-                                </button>
-                            </form>
-                            {% elif ot.estado == 'ESPERANDO_REPUESTO' %}
-                            <form method="post" action="{% url 'taller_update_estado' ot.id %}" style="flex:1;">
-                                {% csrf_token %}
-                                <input type="hidden" name="estado" value="EN_PROCESO">
-                                <button type="submit" class="btn-ot-action btn-primary-outline" style="width: 100%;">
-                                    <i class="icon">▶️</i> Retomar Trabajo
-                                </button>
-                            </form>
-                            {% endif %}
-                            
-                            <a href="{% url 'taller_close_ot' ot.id %}" class="btn-ot-action btn-success" style="flex:1;">
-                                <i class="icon">✅</i> Finalizar Trabajo
-                            </a>
-                        </div>
-                    </div>
+                    <!-- Hacemos include del componente partial que tiene soporte para HTMX -->
+                    {% include 'gestion/taller/partials/ot_card_content.html' with ot=ot %}
                 {% endfor %}
                 </div>
             {% else %}

@@ -13,6 +13,19 @@
     </div>
 </div>
 
+<!-- INICIO GRÁFICOS APEXCHARTS ROOT -->
+<div class="charts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+    <div class="chart-card" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 20px;">
+        <h3 style="color: white; font-size: 1.1rem; margin-bottom: 15px;">Adopción de Módulos (SaaS)</h3>
+        <div id="modulosChart"></div>
+    </div>
+    <div class="chart-card" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 20px;">
+        <h3 style="color: white; font-size: 1.1rem; margin-bottom: 15px;">Estado de Licencias</h3>
+        <div id="empresasChart"></div>
+    </div>
+</div>
+<!-- FIN GRÁFICOS -->
+
 <div class="machines-grid">
     {% for empresa in empresas %}
     <div class="machine-card hover-lift" style="border-top: 4px solid var(--accent, #3b82f6);">
@@ -125,4 +138,12 @@
     </a>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+{{ empresas_activas|json_script:"activas-data" }}
+{{ empresas_inactivas|json_script:"inactivas-data" }}
+{{ modulos_data|json_script:"modulos-data" }}
+<script src="{% static 'gestion/js/root_charts.js' %}"></script>
 {% endblock %}

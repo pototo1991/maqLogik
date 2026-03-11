@@ -3,43 +3,73 @@
 //   =========================================================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    // UI Logic for CombustibleLogForm
+    // =====================================================================
+    //  UI DINÁMICA: Campos condicionales según Tipo de Carga
+    //  INTERNA: Maquina, Operador, Litros, OT, Sello Flujómetro
+    //  EXTERNA: Maquina, Operador, Litros, OT, Precio Litro, Costo Total, Tipo Doc, N° Doc
+    // =====================================================================
     const tipoSelect = document.getElementById('tipo_carga_select');
-    const precioUnitarioGroup = document.getElementById('group_precio_unitario');
-    const costoTotalGroup = document.getElementById('group_costo_total');
     
-    // Nuevos campos de facturación (si existen en el DOM)
-    const tipoDocGroup = document.getElementById('group_tipo_documento');
-    const numDocGroup = document.getElementById('group_numero_documento');
-    
-    // Campo de Sello del Flujómetro (Obligatorio en Interna)
-    const selloFlujometroGroup = document.getElementById('group_sello_flujometro');
+    // Grupos COMUNES: siempre visibles tras elegir tipo
+    const gruposComunes = [
+        'group_orden_trabajo',
+        'group_maquina',
+        'group_operador',
+        'group_litros',
+        'group_medida_al_cargar',
+    ];
+
+    // Grupos exclusivos de INTERNA
+    const gruposInterna = [
+        'group_sello_flujometro',
+    ];
+
+    // Grupos exclusivos de EXTERNA
+    const gruposExterna = [
+        'group_tipo_documento',
+        'group_numero_documento',
+        'group_precio_unitario',
+        'group_costo_total',
+    ];
 
     // Nodos para Auto-Cálculo
     const cantidadLitros = document.getElementById('litros_input');
     const precioLitro = document.getElementById('precio_unitario_input');
     const totalPago = document.getElementById('costo_total_input');
-    
-    function toggleFields() {
-        if (!tipoSelect || !precioUnitarioGroup || !costoTotalGroup) return;
 
-        if (tipoSelect.value === 'INTERNA') {
-            precioUnitarioGroup.classList.add('hidden');
-            costoTotalGroup.classList.add('hidden');
-            if (tipoDocGroup) tipoDocGroup.classList.add('hidden');
-            if (numDocGroup) numDocGroup.classList.add('hidden');
-            if (selloFlujometroGroup) selloFlujometroGroup.classList.remove('hidden'); // MOSTRAR Sello
-        } else {
-            precioUnitarioGroup.classList.remove('hidden');
-            costoTotalGroup.classList.remove('hidden');
-            if (tipoDocGroup) tipoDocGroup.classList.remove('hidden');
-            if (numDocGroup) numDocGroup.classList.remove('hidden');
-            if (selloFlujometroGroup) selloFlujometroGroup.classList.add('hidden'); // OCULTAR Sello
+    function setVisible(ids, visible) {
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = visible ? '' : 'none';
+        });
+    }
+
+    function toggleFields() {
+        if (!tipoSelect) return;
+        const tipo = tipoSelect.value;
+
+        if (!tipo) {
+            // Nada seleccionado: ocultar todo excepto el selector
+            setVisible(gruposComunes, false);
+            setVisible(gruposInterna, false);
+            setVisible(gruposExterna, false);
+            return;
+        }
+
+        // Mostrar campos comunes
+        setVisible(gruposComunes, true);
+
+        if (tipo === 'INTERNA') {
+            setVisible(gruposInterna, true);
+            setVisible(gruposExterna, false);
+        } else { // EXTERNA
+            setVisible(gruposInterna, false);
+            setVisible(gruposExterna, true);
         }
     }
 
     function calculateTotal() {
-        if (cantidadLitros && precioLitro && totalPago && tipoSelect.value === 'EXTERNA') {
+        if (cantidadLitros && precioLitro && totalPago && tipoSelect && tipoSelect.value === 'EXTERNA') {
             const lts = parseFloat(cantidadLitros.value) || 0;
             const precio = parseFloat(precioLitro.value) || 0;
             if (lts > 0 && precio > 0) {
@@ -49,12 +79,22 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-    
+
     if (tipoSelect) {
-        tipoSelect.addEventListener('change', () => {
-            toggleFields();
-            calculateTotal(); // recalcular por si acaso
-        });
+        // Select2 emite eventos jQuery, no nativos, por eso usamos jQuery .on()
+        if (typeof $ !== 'undefined') {
+            $('#tipo_carga_select').on('change', function() {
+                toggleFields();
+                calculateTotal();
+            });
+        } else {
+            // Fallback por si jQuery no cargó aún
+            tipoSelect.addEventListener('change', () => {
+                toggleFields();
+                calculateTotal();
+            });
+        }
+        // Ejecutar al cargar para respetar el valor inicial (cuando hay error de validación y se vuelve al form)
         toggleFields();
     }
 
@@ -64,77 +104,64 @@ document.addEventListener('DOMContentLoaded', function() {
         precioLitro.addEventListener('input', calculateTotal);
     }
 
+
     // Auto-Asignación de OT Abierta
     const maquinaSelect = document.getElementById('id_maquina');
     const otSelect = document.getElementById('id_orden_trabajo');
     const operadorSelect = document.getElementById('id_operador'); // Select del Operador
 
     if (maquinaSelect && otSelect) {
-        maquinaSelect.addEventListener('change', function() {
+        // Select2 en maquina también emite evento jQuery
+        $('#id_maquina').on('change', function() {
             const maquinaId = this.value;
             if (!maquinaId) return;
 
-            // Consultar a la API si hay una OT Abierta para esta máquina
             fetch(`/api/combustible/maquina/${maquinaId}/ot_abierta/`)
                 .then(response => response.json())
                 .then(data => {
+                    // ─── 1. Auto-seleccionar la OT más reciente ───
                     if (data.ot_id) {
-                        otSelect.value = data.ot_id;
-                        // Destacar visualmente el cambio automático en OT
-                        otSelect.style.transition = 'border-color 0.3s, box-shadow 0.3s';
-                        otSelect.style.borderColor = '#10b981';
-                        otSelect.style.boxShadow = '0 0 5px rgba(16, 185, 129, 0.5)';
-                        
-                        // Si nos viene el operador de la OT, auto-asignarlo también
-                        if (data.operador_id && operadorSelect) {
-                            operadorSelect.value = data.operador_id;
-                            operadorSelect.style.transition = 'border-color 0.3s, box-shadow 0.3s';
-                            operadorSelect.style.borderColor = '#10b981';
-                            operadorSelect.style.boxShadow = '0 0 5px rgba(16, 185, 129, 0.5)';
-                        }
-
-                        // Auto-rellenar Medida Actual (Horómetro/Km)
-                        const medidaInput = document.getElementById('id_medida_al_cargar');
-                        if (medidaInput && data.medida_actual !== undefined) {
-                            medidaInput.value = data.medida_actual;
-                            // Efecto visual azul para las medidas numéricas
-                            medidaInput.style.transition = 'border-color 0.3s, box-shadow 0.3s';
-                            medidaInput.style.borderColor = '#3b82f6';
-                            medidaInput.style.boxShadow = '0 0 5px rgba(59, 130, 246, 0.5)';
-                        }
-
-                        setTimeout(() => {
-                            otSelect.style.borderColor = '';
-                            otSelect.style.boxShadow = '';
-                            if (operadorSelect) {
-                                operadorSelect.style.borderColor = '';
-                                operadorSelect.style.boxShadow = '';
-                            }
-                            if (medidaInput) {
-                                medidaInput.style.borderColor = '';
-                                medidaInput.style.boxShadow = '';
-                            }
-                        }, 2000);
+                        $(otSelect).val(data.ot_id).trigger('change'); // Notificar a Select2
+                        highlightField(otSelect, 'green');
                     } else {
-                        // Si no hay OT abierta, dejar OT en blanco
-                        otSelect.value = '';
-                        
-                        // Pero de igual modo, si la API nos devolvió la medida, inyectarla
-                        const medidaInput = document.getElementById('id_medida_al_cargar');
-                        if (medidaInput && data.medida_actual !== undefined && data.medida_actual !== '') {
-                            medidaInput.value = data.medida_actual;
-                            medidaInput.style.transition = 'border-color 0.3s, box-shadow 0.3s';
-                            medidaInput.style.borderColor = '#3b82f6';
-                            medidaInput.style.boxShadow = '0 0 5px rgba(59, 130, 246, 0.5)';
-                            setTimeout(() => {
-                                medidaInput.style.borderColor = '';
-                                medidaInput.style.boxShadow = '';
-                            }, 2000);
+                        $(otSelect).val('').trigger('change');
+                    }
+
+                    // ─── 2. Auto-seleccionar Operador (OT tiene prioridad; fallback = operador fijo de la máquina) ───
+                    if (data.operador_id && operadorSelect) {
+                        $(operadorSelect).val(data.operador_id).trigger('change'); // Notificar a Select2
+                        highlightField(operadorSelect, 'green');
+                    }
+
+                    // ─── 3. Auto-rellenar Medida (Horómetro/Km) ───
+                    const medidaInput = document.getElementById('id_medida_al_cargar');
+                    if (medidaInput && data.medida_actual !== undefined && data.medida_actual !== '') {
+                        medidaInput.value = data.medida_actual;
+                        // Actualizar placeholder con la unidad correcta (Km o Hr)
+                        if (data.unidad_label) {
+                            medidaInput.placeholder = `Registro actual de la máquina (${data.unidad_label})`;
                         }
+                        highlightField(medidaInput, 'blue');
                     }
                 })
-                .catch(err => console.error("Error al obtener OT:", err));
+                .catch(err => console.error("Error al obtener datos de la máquina:", err));
         });
+    }
+
+    function highlightField(el, color) {
+        if (!el) return;
+        const colors = {
+            green: { border: '#10b981', shadow: 'rgba(16, 185, 129, 0.5)' },
+            blue:  { border: '#3b82f6', shadow: 'rgba(59, 130, 246, 0.5)' }
+        };
+        const c = colors[color] || colors.green;
+        el.style.transition = 'border-color 0.3s, box-shadow 0.3s';
+        el.style.borderColor = c.border;
+        el.style.boxShadow = `0 0 5px ${c.shadow}`;
+        setTimeout(() => {
+            el.style.borderColor = '';
+            el.style.boxShadow = '';
+        }, 2500);
     }
 
     // Autocálculo para Compra de Combustible (Facturas a Proveedor)

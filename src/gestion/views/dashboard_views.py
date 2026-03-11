@@ -80,6 +80,44 @@ def dashboard(request):
         if hora_actual >= 19:
             alertas_rezagados.append(ot)
             
+    # Data para Gráficos (Solo para OWNER/CHIEF/ROOT)
+    fechas_str = []
+    ots_cantidades = []
+    combustible_lts = []
+    costos_taller = []
+    
+    if request.user.rol in ['OWNER', 'CHIEF'] or request.user.is_superuser:
+        hoy = timezone.localdate()
+        from django.db.models import Sum
+        from ..models import CombustibleLog, OrdenTaller
+        
+        for i in range(6, -1, -1):
+            fecha_iter = hoy - timedelta(days=i)
+            fechas_str.append(fecha_iter.strftime('%d %b'))
+            
+            # 1. Órdenes Creadas
+            cant_ots = OrdenTrabajo.objects.filter(fecha_salida__date=fecha_iter).count()
+            ots_cantidades.append(cant_ots)
+            
+            # 2. Consumo Combustible (Litros)
+            if getattr(request.empresa, 'modulo_combustible', False):
+                consumo = CombustibleLog.objects.filter(
+                    fecha_carga__date=fecha_iter
+                ).aggregate(total=Sum('litros'))['total'] or 0
+                combustible_lts.append(float(consumo))
+            else:
+                combustible_lts.append(0)
+                
+            # 3. Costos de Taller (Órdenes cerradas en esa fecha)
+            if getattr(request.empresa, 'modulo_mantencion', False):
+                costo = OrdenTaller.objects.filter(
+                    fecha_salida__date=fecha_iter,
+                    estado='FINALIZADO'
+                ).aggregate(total=Sum('costo_total'))['total'] or 0
+                costos_taller.append(float(costo))
+            else:
+                costos_taller.append(0)
+            
     logger.info(f"AUDITORÍA - Dashboard Consultado por Usuario: '{request.user.username}' de la empresa '{request.user.empresa.nombre_fantasia if request.user.empresa else 'System Admin'}'")
     
     context = {
@@ -93,5 +131,11 @@ def dashboard(request):
         'alertas_madrugadores': alertas_madrugadores,
         'alertas_rezagados': alertas_rezagados,
         'hora_actual_servidor': hora_actual,
+        'fechas_chart': fechas_str,
+        'ots_chart': ots_cantidades,
+        'combustible_chart': combustible_lts,
+        'costos_taller_chart': costos_taller,
+        'tiene_modulo_combustible': getattr(request.empresa, 'modulo_combustible', False),
+        'tiene_modulo_taller': getattr(request.empresa, 'modulo_mantencion', False),
     }
     return render(request, 'gestion/dashboard/index.html', context)
