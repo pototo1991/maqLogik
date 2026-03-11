@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Nuevos campos de facturación (si existen en el DOM)
     const tipoDocGroup = document.getElementById('group_tipo_documento');
     const numDocGroup = document.getElementById('group_numero_documento');
+    
+    // Campo de Sello del Flujómetro (Obligatorio en Interna)
+    const selloFlujometroGroup = document.getElementById('group_sello_flujometro');
 
     // Nodos para Auto-Cálculo
     const cantidadLitros = document.getElementById('litros_input');
@@ -25,11 +28,13 @@ document.addEventListener('DOMContentLoaded', function() {
             costoTotalGroup.classList.add('hidden');
             if (tipoDocGroup) tipoDocGroup.classList.add('hidden');
             if (numDocGroup) numDocGroup.classList.add('hidden');
+            if (selloFlujometroGroup) selloFlujometroGroup.classList.remove('hidden'); // MOSTRAR Sello
         } else {
             precioUnitarioGroup.classList.remove('hidden');
             costoTotalGroup.classList.remove('hidden');
             if (tipoDocGroup) tipoDocGroup.classList.remove('hidden');
             if (numDocGroup) numDocGroup.classList.remove('hidden');
+            if (selloFlujometroGroup) selloFlujometroGroup.classList.add('hidden'); // OCULTAR Sello
         }
     }
 

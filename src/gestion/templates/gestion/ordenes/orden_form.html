@@ -51,11 +51,9 @@
             </div>
             {% endfor %}
 
-            <div class="form-actions">
-                <a href="{% url 'orden_list' %}" class="btn-cancel">Cancelar</a>
-                <button type="submit" class="btn-submit {% if is_cierre %}btn-warning{% endif %}">
-                    {{ btn_texto }}
-                </button>
+            <div class="form-actions-bar">
+                <a href="{% url 'orden_list' %}" class="btn-form-cancel">← Cancelar</a>
+                <button type="submit" class="btn-form-save">{{ btn_texto }}</button>
             </div>
         </form>
     </div>
@@ -65,5 +63,5 @@
 {% block extra_js %}
 {{ operadores_map|json_script:"operadores-map-data" }}
 {{ medidas_map|json_script:"medidas-map-data" }}
-<script src="{% static 'gestion/js/ordenes.js' %}?v=1.1"></script>
+<script src="{% static 'gestion/js/ordenes.js' %}?v=1.3"></script>
 {% endblock %}

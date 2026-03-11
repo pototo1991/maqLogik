@@ -37,6 +37,18 @@ class Empresa(models.Model):
     modulo_gps = models.BooleanField(default=False, help_text="Rastreo Telemétrico")
     modulo_reporteria = models.BooleanField(default=False, help_text="Exportación a PDF/Excel")
 
+class ConfiguracionMantencion(models.Model):
+    empresa = models.OneToOneField(Empresa, on_delete=models.CASCADE, related_name='configuracion_mantencion')
+    intervalo_horas = models.PositiveIntegerField(default=200, help_text="Horas para mantención preventiva")
+    intervalo_km = models.PositiveIntegerField(default=10000, help_text="Kilómetros para mantención preventiva")
+    
+    class Meta:
+        verbose_name = 'Configuración de Mantención'
+        verbose_name_plural = 'Configuraciones de Mantención'
+        
+    def __str__(self):
+        return f"Configuración {self.empresa.nombre_fantasia}"
+
 # 2. USUARIOS (Custom User)
 class Usuario(AbstractUser):
     ROLES = (
@@ -112,6 +124,7 @@ class Checklist(models.Model):
     luces_ok = models.BooleanField(default=True)
     estructura_ok = models.BooleanField(default=True)
     comentarios = models.TextField(blank=True)
+    firma_operador = models.TextField(blank=True, null=True, help_text="Firma digital guardada en Base64")
     fecha_revision = models.DateTimeField(auto_now_add=True)
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
 
@@ -179,6 +192,7 @@ class CombustibleLog(models.Model):
     orden_trabajo = models.ForeignKey(OrdenTrabajo, on_delete=models.SET_NULL, null=True, blank=True, help_text="OT opcional al momento de cargar")
     tipo_documento = models.CharField(max_length=50, blank=True, null=True, help_text="Ej: Factura, Boleta, Guía (o en blanco si es interna)")
     numero_documento = models.CharField(max_length=50, blank=True, null=True)
+    sello_flujometro = models.BigIntegerField(null=True, blank=True, help_text="Número de sello del flujómetro (Cargas internas)")
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
 
     objects = EmpresaManager()

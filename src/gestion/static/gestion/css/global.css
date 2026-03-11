@@ -25,6 +25,26 @@
     --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
+/* Paleta Premium: Light Mode */
+[data-theme="light"] {
+    --color-bg-primary: #f0f2f5; 
+    --color-bg-secondary: #ffffff; 
+    --color-brand: #059669; /* Verde más oscuro/legible sobre blanco */
+    --color-brand-hover: #047857;
+    --color-brand-glow: rgba(5, 150, 105, 0.2);
+    
+    --color-text-main: #1f2937; /* Gris muy oscuro, casi negro */
+    --color-text-muted: #6b7280; /* Gris medio */
+    
+    --color-error: #dc2626;
+    --color-error-glow: rgba(220, 38, 38, 0.1);
+    
+    /* Glassmorphism Invertido para fondos claros */
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(0, 0, 0, 0.05);
+    --glass-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -105,4 +125,309 @@ body {
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================
+   PAGINACIÓN
+   ========================================= */
+.pagination-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 30px;
+    gap: 15px;
+}
+
+.pagination-info {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+}
+
+.pagination-links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.btn-page {
+    padding: 8px 14px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--color-text-main);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.btn-page:hover:not(.disabled):not(.active) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-page.active {
+    background: var(--color-brand);
+    color: #000;
+    font-weight: bold;
+    border-color: var(--color-brand);
+    box-shadow: 0 0 10px var(--color-brand-glow);
+}
+
+.btn-page.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* =============================================
+   DROPDOWN MENU AVATAR (Mi Cuenta)
+   ============================================= */
+
+.avatar-menu-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 14px);
+    right: 0;
+    min-width: 220px;
+    background: #1a2035;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+    backdrop-filter: blur(20px);
+    z-index: 1000;
+    overflow: hidden;
+    animation: fadeSlideDown 0.18s ease;
+}
+
+.avatar-dropdown.open {
+    display: block;
+}
+
+@keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0);    }
+}
+
+.avatar-dropdown-header {
+    padding: 16px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.avatar-dropdown-body {
+    padding: 8px;
+}
+
+.avatar-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    color: var(--color-text-main);
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: background 0.15s;
+}
+
+.avatar-dropdown-item:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+.avatar-dropdown-item.danger {
+    color: #f87171;
+}
+
+.avatar-dropdown-item.danger:hover {
+    background: rgba(239,68,68,0.12);
+}
+
+.avatar-dropdown-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+    margin: 6px 0;
+}
+
+/* =============================================
+   SELECT2 (Buscador en Dropdowns Glassmorphism)
+   ============================================= */
+
+/* Contenedor Principal (El Input visible) */
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple {
+    background: rgba(0, 0, 0, 0.35) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: var(--radius-md) !important;
+    height: 48px !important;
+    padding: 0 16px;
+    display: flex !important;
+    align-items: center !important;
+    color: var(--color-text-main) !important;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+/* Estado Focus */
+.select2-container--default.select2-container--focus .select2-selection--single,
+.select2-container--default.select2-container--focus .select2-selection--multiple {
+    border-color: var(--color-brand) !important;
+    box-shadow: 0 0 0 2px var(--color-brand-glow) !important;
+}
+
+/* Texto de la opción seleccionada — centrado verticalmente */
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: var(--color-text-main) !important;
+    padding-left: 0 !important;
+    /* Centrado vertical: line-height igual a la altura del contenedor */
+    line-height: 48px !important;
+    display: block !important;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Placeholder del select vacío */
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #9ca3af !important;
+    line-height: 48px !important;
+}
+
+/* Flechita derecha — centrada verticalmente */
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 48px !important;
+    top: 0 !important;
+    right: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Panel Desplegable Flotante (Donde salen las opciones) */
+.select2-dropdown {
+    background: rgba(17, 24, 39, 0.9) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important;
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+/* Barra de Búsqueda Interna */
+.select2-search--dropdown {
+    padding: 12px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    background: rgba(0,0,0,0.5) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    color: white !important;
+    border-radius: 4px;
+    padding: 8px 12px !important;
+}
+.select2-container--default .select2-search--dropdown .select2-search__field:focus {
+    border-color: var(--color-brand) !important;
+    outline: none;
+}
+
+/* Cada opción del menú — Base */
+.select2-container--default .select2-results__option {
+    padding: 10px 16px !important;
+    background-color: transparent !important;
+    color: var(--color-text-main) !important;
+    font-size: 0.95rem;
+}
+
+/* Opción actualmente seleccionada (la que ya está en el input) — tono verde sutil */
+.select2-container--default .select2-results__option[aria-selected=true],
+.select2-container--default .select2-results__option--selected {
+    background-color: rgba(0, 230, 118, 0.08) !important;
+    color: var(--color-brand) !important;
+}
+
+/* Hover / Navegación con teclado (highlighted) — efecto Neon verde */
+.select2-container--default .select2-results__option--highlighted,
+.select2-container--default .select2-results__option--highlighted.select2-results__option--selected,
+.select2-container--default .select2-results__option--highlighted[aria-selected],
+.select2-container--default .select2-results__option--highlighted[aria-selected=true] {
+    background-color: var(--color-brand) !important;
+    color: #000 !important;
+    font-weight: 600;
+}
+
+/* =============================================
+   BOTONES DE FORMULARIO (Estándar Unificado)
+   ============================================= */
+
+/* Barra de acciones al pie de cada formulario */
+.form-actions-bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 35px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Botón GUARDAR / ENVIAR — Verde Neon primario */
+.btn-form-save {
+    flex: 1;
+    padding: 13px 24px;
+    background: var(--color-brand);
+    color: #000;
+    font-weight: 700;
+    font-size: 0.95rem;
+    font-family: inherit;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 0 16px var(--color-brand-glow);
+    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    text-align: center;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-form-save:hover {
+    background: var(--color-brand-hover);
+    box-shadow: 0 0 24px var(--color-brand-glow);
+    transform: translateY(-1px);
+}
+
+.btn-form-save:active {
+    transform: translateY(0);
+}
+
+/* Botón CANCELAR — Transparente con borde sutil */
+.btn-form-cancel {
+    padding: 13px 24px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #9ca3af;
+    font-weight: 500;
+    font-size: 0.95rem;
+    font-family: inherit;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    text-align: center;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-form-cancel:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.25);
 }

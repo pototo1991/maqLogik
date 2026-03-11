@@ -1,14 +1,24 @@
-// =========================================================================
-//   MaqLogik - Lógica JS del Módulo Checklist
-// =========================================================================
+/**
+ * MaqLogik - Script de Gestión de Formularios de Checklist y Firma Digital Canvas
+ */
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Si necesitas enlazar el operador a la máquina seleccionada en un futuro
-    // aquí puede ir la lógica (como existe en Combustible).
+document.addEventListener("DOMContentLoaded", function() {
+
+    // 1. AUTOCOMPLETADO DE OPERADOR
     const selectMaquina = document.getElementById('id_maquina');
-    
-    if (selectMaquina) {
-        // Lógica futura de pre-selección de campos de Checklist a partir de máquina
-        // console.log("Selector de máquina inicializado");
+    if (selectMaquina && typeof operadoresMapContext !== 'undefined' && operadoresMapContext) {
+        try {
+            const mapOperator = JSON.parse(operadoresMapContext);
+            selectMaquina.addEventListener('change', function() {
+                const maquinaId = this.value;
+                if (mapOperator[maquinaId]) {
+                    // Si el sistema tuviera select de operador, podríamos rellenarlo aquí.
+                    // Actualmente, el operador se asigna por request.user al hacer post en la vista.
+                    console.log(`Operador esperado fijo para la máquina elegida: ${mapOperator[maquinaId]}`);
+                }
+            });
+        } catch (e) {
+            console.error("No se pudo parsear el diccionario de operadores móviles", e);
+        }
     }
 });

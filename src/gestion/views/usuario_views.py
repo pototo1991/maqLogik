@@ -1,8 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.paginator import Paginator
 from ..models import Usuario
 from ..forms import UsuarioCreationForm, UsuarioUpdateForm
+import logging
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def usuario_list(request):
@@ -18,8 +22,16 @@ def usuario_list(request):
 
     usuarios = Usuario.objects.filter(empresa=request.empresa).exclude(is_superuser=True).order_by(order_string)
     
+    # --- Paginación ---
+    paginator = Paginator(usuarios, 20) # 20 ítems por página
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     return render(request, 'gestion/usuarios/usuario_list.html', {
-        'usuarios': usuarios,
+        'usuarios': page_obj,
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'is_paginated': paginator.num_pages > 1,
         'current_sort': sort_by,
         'current_dir': direction
     })
@@ -35,6 +47,8 @@ def usuario_create(request):
             nuevo_usuario = form.save(commit=False)
             nuevo_usuario.empresa = request.empresa # Asignación crtítica SaaS
             nuevo_usuario.save()
+            logger.info('Usuario CREADO. Nuevo_user=%s. Rol=%s. Creado_por=%s. Empresa=%s.',
+                        nuevo_usuario.username, nuevo_usuario.rol, request.user.username, request.empresa.id)
             messages.success(request, 'Usuario creado exitosamente.')
             return redirect('usuario_list')
         else:
@@ -56,6 +70,8 @@ def usuario_update(request, pk):
         form = UsuarioUpdateForm(request.POST, instance=usuario)
         if form.is_valid():
             form.save()
+            logger.info('Usuario EDITADO. User=%s. Editado_por=%s. Empresa=%s.',
+                        usuario.username, request.user.username, request.empresa.id)
             messages.success(request, 'Usuario actualizado exitosamente.')
             return redirect('usuario_list')
         else:

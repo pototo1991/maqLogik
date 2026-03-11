@@ -83,8 +83,7 @@ def modulo_requerido(nombre_modulo):
             context = {
                 'modulo_solicitado': nombre_modulo.replace('modulo_', '').replace('_', ' ').title()
             }
-            # Por ahora devolveremos un simple Forbidden Text. 
-            # Luego podemos crear un template html bonito de upsell ('gestion/upsell_denied.html')
-            return HttpResponseForbidden(f"Acceso Denegado: Su empresa no ha contratado el módulo {context['modulo_solicitado']}. Contacte a Ventas de MaqLogik.")
+            # Devolver plantilla Upsell con código 403
+            return render(request, 'gestion/upsell_denied.html', context, status=403)
         return _wrapped_view
     return decorator

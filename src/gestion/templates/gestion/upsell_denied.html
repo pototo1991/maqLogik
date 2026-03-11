@@ -1,0 +1,52 @@
+{% extends 'gestion/base.html' %}
+
+{% block title %}Acceso Denegado - MaqLogik{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card bg-dark border-danger shadow-lg text-center" style="border-radius: 15px;">
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <i class="bi bi-shield-lock text-danger" style="font-size: 4rem;"></i>
+                    </div>
+                    <h2 class="text-white mb-3 fw-bold">Acceso Denegado</h2>
+                    <p class="text-white-50 mb-4" style="font-size: 1.1rem;">
+                        Su empresa actualmente no tiene contratado el plan que incluye el módulo de <strong class="text-white">{{ modulo_solicitado }}</strong>.
+                    </p>
+                    <div class="alert alert-dark border border-secondary text-start mb-4">
+                        <h5 class="alert-heading text-info"><i class="bi bi-info-circle me-2"></i>¿Qué incluye este módulo?</h5>
+                        <ul class="text-white-50 mb-0 ps-3">
+                            {% if "Combustible" in modulo_solicitado %}
+                                <li>Control exacto de recargas por máquina y operador.</li>
+                                <li>Registro de compras de tambores físicos y virtuales.</li>
+                                <li>Reportes de rendimiento litros/hora o litros/km.</li>
+                            {% elif "Taller" in modulo_solicitado %}
+                                <li>Gestión de órdenes de trabajo (OT) correctivas y preventivas.</li>
+                                <li>Cálculo de costos de mantenimiento e inventario de repuestos.</li>
+                                <li>Alerta temprana de mantenciones según horómetro.</li>
+                            {% else %}
+                                <li>Automatización de procesos operativos específicos.</li>
+                                <li>Mayor control y reducción de costos garantizada.</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    
+                    <a href="mailto:ventas@maqlogik.com?subject=Solicitud de Mejora de Plan - Módulo {{ modulo_solicitado }}" class="btn btn-outline-info w-100 py-3 mb-3 fw-bold" style="border-radius: 10px;">
+                        <i class="bi bi-envelope-fill me-2"></i> Contactar a Ventas
+                    </a>
+                    
+                    <a href="{% url 'dashboard' %}" class="btn btn-primary w-100 py-3 mb-3 fw-bold" style="border-radius: 10px;">
+                        <i class="bi bi-house-door me-2"></i> Volver al Inicio
+                    </a>
+                    
+                    <a href="{% url 'web_logout' %}" class="btn btn-outline-secondary w-100 py-2 fw-bold" style="border-radius: 10px;">
+                        <i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

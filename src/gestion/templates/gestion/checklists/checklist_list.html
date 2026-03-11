@@ -9,73 +9,66 @@
 {% endblock %}
 
 {% block content %}
-<div class="header-actions">
-    <h1 style="color: white; margin: 0;">Historial de Revisiones Diarias</h1>
-    <a href="{% url 'checklist_create' %}" class="btn-neon">+ Registrar Checklist</a>
+<div class="header-actions" style="margin-bottom: 30px; display: flex; align-items: center; flex-wrap: wrap; gap: 15px;">
+    <h1 style="color: white; margin: 0; font-size: 1.5rem; flex-grow: 1;">Historial de Revisiones Diarias</h1>
+    <a href="{% url 'exportar_csv' 'checklists' %}" class="btn-sm" style="background: #10b981; color: white; border-color: #059669; padding: 10px 15px; text-decoration: none; font-weight: 500; border-radius: 8px;">📊 Exportar a Excel</a>
+    <a href="{% url 'checklist_create' %}" class="btn-neon">+ Iniciar Nueva Inspección</a>
 </div>
 
-<div class="table-container">
-    <table class="data-table">
+<div class="table-responsive" style="overflow-x: auto; background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left; min-width: 800px;">
         <thead>
-            <tr>
-                <th>Fecha/Hora</th>
-                <th>Máquina</th>
-                <th>Operador/Revisor</th>
-                <th>Niveles</th>
-                <th>Luces</th>
-                <th>Estructura</th>
-                <th>Comentarios</th>
+            <tr style="border-bottom: 2px solid rgba(255,255,255,0.1); color: #9ca3af; font-size: 0.9rem;">
+                <th style="padding: 15px 10px;">Fecha / Hora</th>
+                <th style="padding: 15px 10px;">Máquina</th>
+                <th style="padding: 15px 10px;">Revisor / Operador</th>
+                <th style="padding: 15px 10px;">Fluidos/Niveles</th>
+                <th style="padding: 15px 10px;">Luces/Eléctrico</th>
+                <th style="padding: 15px 10px;">Estructura/Llantas</th>
+                <th style="padding: 15px 10px;">Observaciones</th>
             </tr>
         </thead>
         <tbody>
             {% for c in checklists %}
-            <tr>
-                <td style="color: #9ca3af;">{{ c.fecha_revision|date:"d/m/Y H:i" }}</td>
-                <td style="font-weight: 500;">{{ c.maquina.id_interno }} ({{ c.maquina.patente }})</td>
-                <td>{{ c.usuario.get_full_name|default:c.usuario.username }}</td>
-                
-                <td>
-                    {% if c.niveles_ok %}
-                        <span class="badge success">✓ OK</span>
-                    {% else %}
-                        <span class="badge danger">⚠️ Falla</span>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #e5e7eb; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+                <td style="padding: 16px 10px;">
+                    <div>{{ c.fecha_revision|date:"d/m/Y" }}</div>
+                    <div style="font-size: 0.8rem; color: #9ca3af;">{{ c.fecha_revision|date:"H:i" }}</div>
+                    {% if forloop.first %}
+                    <div style="margin-top: 5px;"><span style="background: #3b82f6; color: white; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 6px;">🌟 ÚLTIMA</span></div>
                     {% endif %}
                 </td>
-                
-                <td>
-                    {% if c.luces_ok %}
-                        <span class="badge success">✓ OK</span>
-                    {% else %}
-                        <span class="badge danger">⚠️ Falla</span>
-                    {% endif %}
+                <td style="padding: 16px 10px; font-weight: bold; color: white;">🚜 {{ c.maquina.id_interno }}</td>
+                <td style="padding: 16px 10px;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <i class="icon" style="font-size: 0.8rem;">👷</i> {{ c.usuario.get_full_name|default:c.usuario.username }}
+                    </div>
                 </td>
-                
-                <td>
-                    {% if c.estructura_ok %}
-                        <span class="badge success">✓ OK</span>
-                    {% else %}
-                        <span class="badge danger">⚠️ Falla</span>
-                    {% endif %}
+                <td style="padding: 16px 10px;">
+                    {% if c.niveles_ok %}<span class="badge success" style="padding: 4px 8px;">✓ OK</span>{% else %}<span class="badge danger" style="padding: 4px 8px;">⚠️ Falla</span>{% endif %}
                 </td>
-                
-                <td>
-                    {% if c.comentarios %}
-                        <span style="font-size: 0.85rem; color: #d1d5db;" title="{{ c.comentarios }}">
-                            {{ c.comentarios|truncatechars:30 }}
-                        </span>
-                    {% else %}
-                        <span style="color: #6b7280; font-size: 0.85rem;">Ninguno</span>
-                    {% endif %}
+                <td style="padding: 16px 10px;">
+                    {% if c.luces_ok %}<span class="badge success" style="padding: 4px 8px;">✓ OK</span>{% else %}<span class="badge danger" style="padding: 4px 8px;">⚠️ Falla</span>{% endif %}
+                </td>
+                <td style="padding: 16px 10px;">
+                    {% if c.estructura_ok %}<span class="badge success" style="padding: 4px 8px;">✓ OK</span>{% else %}<span class="badge danger" style="padding: 4px 8px;">⚠️ Falla</span>{% endif %}
+                </td>
+                <td style="padding: 16px 10px; font-style: italic; color: #9ca3af; font-size: 0.85rem; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ c.comentarios }}">
+                    {% if c.comentarios %}"{{ c.comentarios|truncatechars:30 }}"{% else %}-{% endif %}
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7" style="text-align: center; padding: 30px; color: #9ca3af;">
-                    No hay revisiones (checklists) registradas para tu maquinaria.
+                <td colspan="7" style="text-align: center; padding: 50px 20px; color: #9ca3af;">
+                    <div style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;">📝</div>
+                    <h2 style="color: white; margin-bottom: 5px; font-size: 1.2rem;">Sin Inspecciones</h2>
+                    <p style="margin:0;">No hay revisiones registradas en tu flota.</p>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+
+{% include 'gestion/partials/pagination.html' %}
 {% endblock %}

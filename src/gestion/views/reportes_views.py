@@ -42,6 +42,9 @@ def generar_pdf(request, tipo_reporte):
     elif tipo_reporte == 'rendimiento_combustible':
         return _pdf_rendimiento_combustible(request)
         
+    elif tipo_reporte == 'gastos_totales':
+        return _pdf_gastos_totales(request)
+        
     else:
         # Retorno seguro si el tipo no es mapeable
         return render(request, 'gestion/reportes/dashboard.html', {'error': 'Tipo de reporte desconocido'})
@@ -213,3 +216,91 @@ def _pdf_rendimiento_combustible(request):
         return response
         
     return render(request, 'gestion/reportes/dashboard.html', {'error': 'Error al generar el PDF de Rendimiento.'})
+
+def _pdf_gastos_totales(request):
+    fecha_inicio = request.GET.get('fecha_inicio')
+    fecha_fin = request.GET.get('fecha_fin')
+    
+    if not fecha_inicio or not fecha_fin:
+        return render(request, 'gestion/reportes/dashboard.html', {'error': 'Debe especificar un rango de fechas.'})
+        
+    try:
+        from datetime import datetime
+        start_date = datetime.strptime(fecha_inicio, '%Y-%m-%d')
+        end_date = datetime.strptime(fecha_fin, '%Y-%m-%d')
+        end_date = end_date.replace(hour=23, minute=59, second=59)
+    except Exception:
+        return render(request, 'gestion/reportes/dashboard.html', {'error': 'Formato de fecha inválido.'})
+        
+    from django.db.models import Sum
+    from collections import defaultdict
+    
+    # Costos de Combustible
+    combustibles = CombustibleLog.objects.filter(
+        empresa=request.empresa,
+        fecha_carga__range=[start_date, end_date]
+    ).values('maquina__id_interno', 'maquina__tipo').annotate(
+        costo_combustible=Sum('costo_total')
+    )
+    
+    # Costos de Taller (Órdenes Finalizadas con costo)
+    talleres = OrdenTaller.objects.filter(
+        empresa=request.empresa,
+        estado='FINALIZADO',
+        fecha_salida__range=[start_date, end_date]
+    ).values('maquina__id_interno', 'maquina__tipo').annotate(
+        costo_taller=Sum('costo_total')
+    )
+    
+    # Consolidar datos en un diccionario usando el id_interno como llave
+    gastos_consolidados = defaultdict(lambda: {'tipo': '', 'combustible': 0, 'taller': 0, 'total': 0})
+    
+    total_global_combustible = 0
+    total_global_taller = 0
+    
+    for c in combustibles:
+        maq = c['maquina__id_interno']
+        costo = c['costo_combustible'] or 0
+        gastos_consolidados[maq]['tipo'] = c['maquina__tipo']
+        gastos_consolidados[maq]['combustible'] += costo
+        gastos_consolidados[maq]['total'] += costo
+        total_global_combustible += costo
+        
+    for t in talleres:
+        maq = t['maquina__id_interno']
+        costo = t['costo_taller'] or 0
+        gastos_consolidados[maq]['tipo'] = t['maquina__tipo']
+        gastos_consolidados[maq]['taller'] += costo
+        gastos_consolidados[maq]['total'] += costo
+        total_global_taller += costo
+        
+    total_general = total_global_combustible + total_global_taller
+    
+    # Sort by total cost descending
+    lista_gastos = sorted(
+        [{'maquina': k, **v} for k, v in gastos_consolidados.items()],
+        key=lambda x: x['total'], 
+        reverse=True
+    )
+    
+    context = {
+        'empresa': request.empresa,
+        'usuario': request.user,
+        'fecha_inicio': start_date.strftime('%d/%m/%Y'),
+        'fecha_fin': end_date.strftime('%d/%m/%Y'),
+        'fecha_generacion': timezone.localtime(timezone.now()).strftime('%d/%m/%Y %H:%M'),
+        'gastos': lista_gastos,
+        'total_combustible': total_global_combustible,
+        'total_taller': total_global_taller,
+        'total_general': total_general
+    }
+    
+    pdf = render_to_pdf('gestion/reportes/gastos_totales_pdf.html', context)
+    
+    if pdf:
+        response = HttpResponse(pdf, content_type='application/pdf')
+        filename = f"Gastos_Consolidados_{start_date.strftime('%Y%m')}.pdf"
+        response['Content-Disposition'] = f"inline; filename={filename}"
+        return response
+        
+    return render(request, 'gestion/reportes/dashboard.html', {'error': 'Error al generar el PDF de Gastos Totales.'})

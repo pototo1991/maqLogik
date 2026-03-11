@@ -7,6 +7,9 @@ from django.utils import timezone
 from ..models import InventarioCombustible, CompraCombustible, CombustibleLog
 from ..forms import CompraCombustibleForm, CombustibleLogForm
 from ..utils import modulo_requerido
+import logging
+
+logger = logging.getLogger(__name__)
 
 @login_required(login_url='web_login')
 @modulo_requerido('modulo_combustible')
@@ -58,6 +61,9 @@ def compra_create(request):
             inventario.stock_actual = nuevo_stock
             inventario.save()
             
+            logger.info('COMPRA combustible ID=%s. Litros=%s. PPP nuevo=%.2f. Usuario=%s. Empresa=%s.',
+                        compra.pk, litros_nuevos, inventario.precio_promedio_ponderado,
+                        request.user.username, request.empresa.id)
             messages.success(request, f'¡Reabastecimiento registrado exitosamente! Nuevo stock: {inventario.stock_actual} Lts.')
             return redirect('combustible_dashboard')
     else:
@@ -112,6 +118,8 @@ def carga_create(request):
             
             # Se guarda el log consolidado
             carga.save()
+            logger.info('CARGA combustible ID=%s. Tipo=%s. Litros=%s. Maquina=%s. Usuario=%s. Empresa=%s.',
+                        carga.pk, tipo, litros_req, carga.maquina_id, request.user.username, request.empresa.id)
             messages.success(request, f'Carga de {litros_req} Lts. ("{tipo}") registrada existosamente para {carga.maquina.id_interno}.')
             return redirect('combustible_dashboard')
         else:

@@ -9,3 +9,4 @@ from .mapa_views import *
 from .taller_views import *
 from .reportes_views import *
 from .root_views import *
+from .export_views import *

@@ -25,8 +25,8 @@ def root_dashboard(request):
     return render(request, 'gestion/root/dashboard.html', context)
 
 from django.db import transaction
-from ..forms import EmpresaForm, UsuarioCreationForm
-from ..models import Usuario
+from ..forms import EmpresaForm, UsuarioCreationForm, ConfiguracionMantencionForm
+from ..models import Usuario, ConfiguracionMantencion
 
 @user_passes_test(is_superadmin, login_url='/')
 def root_create_empresa(request):
@@ -34,12 +34,18 @@ def root_create_empresa(request):
     if request.method == 'POST':
         form_empresa = EmpresaForm(request.POST)
         form_owner = UsuarioCreationForm(request.POST)
+        form_mantencion = ConfiguracionMantencionForm(request.POST)
         
-        if form_empresa.is_valid() and form_owner.is_valid():
+        if form_empresa.is_valid() and form_owner.is_valid() and form_mantencion.is_valid():
             try:
                 with transaction.atomic():
                     # 1. Crear Empresa
                     nueva_empresa = form_empresa.save()
+                    
+                    # 1.5 Crear Configuracion Mantencion
+                    nueva_config = form_mantencion.save(commit=False)
+                    nueva_config.empresa = nueva_empresa
+                    nueva_config.save()
                     
                     # 2. Asignarle el formulario de Owner a esa empresa
                     nuevo_owner = form_owner.save(commit=False)
@@ -58,7 +64,9 @@ def root_create_empresa(request):
             if form_empresa.errors:
                 errors_msg += f"Empresa: {form_empresa.errors.as_text()} | "
             if form_owner.errors:
-                errors_msg += f"Owner: {form_owner.errors.as_text()}"
+                errors_msg += f"Owner: {form_owner.errors.as_text()} | "
+            if form_mantencion.errors:
+                errors_msg += f"Mantención: {form_mantencion.errors.as_text()}"
             
             # Formateando y enviando los errores exactos a los logs del archivo app_control.log
             logger.warning(f"AUDITORÍA - Falla de validación de Formulario al crear empresa: {errors_msg.replace('  ', ' ')}")
@@ -66,11 +74,13 @@ def root_create_empresa(request):
     else:
         form_empresa = EmpresaForm()
         form_owner = UsuarioCreationForm()
+        form_mantencion = ConfiguracionMantencionForm()
 
         
     context = {
         'form_empresa': form_empresa,
-        'form_owner': form_owner
+        'form_owner': form_owner,
+        'form_mantencion': form_mantencion
     }
     return render(request, 'gestion/root/nueva_empresa.html', context)
 
@@ -78,21 +88,26 @@ def root_create_empresa(request):
 def root_edit_modules(request, empresa_id):
     """ Vista para editar los módulos contratados de una Empresa (SaaS Features) """
     empresa = get_object_or_404(Empresa, pk=empresa_id)
+    config_mantencion, created = ConfiguracionMantencion.objects.get_or_create(empresa=empresa)
     
     if request.method == 'POST':
         # Le pasamos la instancia existente para que haga Update en lugar de Create
         form = EmpresaForm(request.POST, instance=empresa)
-        if form.is_valid():
+        form_mantencion = ConfiguracionMantencionForm(request.POST, instance=config_mantencion)
+        if form.is_valid() and form_mantencion.is_valid():
             form.save()
+            form_mantencion.save()
             messages.success(request, f"¡Módulos de la empresa {empresa.nombre_fantasia} actualizados correctamente!")
             return redirect('root_dashboard')
         else:
             messages.error(request, "Error al actualizar los módulos. Verifique los campos.")
     else:
         form = EmpresaForm(instance=empresa)
+        form_mantencion = ConfiguracionMantencionForm(instance=config_mantencion)
         
     context = {
         'form': form,
+        'form_mantencion': form_mantencion,
         'empresa': empresa
     }
     return render(request, 'gestion/root/editar_modulos.html', context)

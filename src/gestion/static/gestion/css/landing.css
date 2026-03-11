@@ -1,0 +1,260 @@
+:root {
+    /* Colores Base Web app (Oscuros / Sobrios) */
+    --bg-base: #050505; 
+    --bg-surface: #111116;
+    --glass-bg: rgba(20, 20, 25, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.05);
+    
+    /* Neones (Dinamismo y Juvenil) */
+    --neon-blue: #00f2fe;
+    --neon-blue-dark: #4facfe;
+    --neon-green: #00f260;
+    --neon-purple: #b300ff;
+    
+    --text-main: #ffffff;
+    --text-muted: #9ca3af; /* Gris claro/plateado para contraste en fondo negro */
+}
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-base);
+    color: var(--text-main);
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    /* Patrón de puntos tecnológicos sutil */
+    background-image: 
+        radial-gradient(var(--glass-border) 1px, transparent 1px);
+    background-size: 30px 30px;
+    background-attachment: fixed;
+}
+
+h1, h2, h3, h4, .brand-font {
+    font-family: 'Outfit', sans-serif;
+}
+
+/* Nav Glassmorphism Premium */
+.navbar-glass {
+    background: rgba(5, 5, 5, 0.85);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-bottom: 1px solid var(--glass-border);
+    padding: 1.2rem 2rem;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    transition: all 0.4s ease;
+}
+
+.navbar-brand {
+    font-weight: 800;
+    font-size: 1.8rem;
+    letter-spacing: -1px;
+    color: #fff !important;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.navbar-brand i { 
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-blue-dark));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 2rem;
+}
+
+.btn-portal {
+    background: transparent;
+    border: 1px solid var(--neon-blue);
+    color: var(--neon-blue) !important;
+    border-radius: 8px;
+    padding: 0.6rem 2rem;
+    font-weight: 600;
+    font-family: 'Outfit', sans-serif;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-portal:hover {
+    background: var(--neon-blue);
+    color: #000 !important;
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-solid-blue {
+    background: linear-gradient(135deg, var(--neon-blue-dark), var(--neon-blue));
+    color: #000 !important;
+    border: none;
+    border-radius: 8px;
+    padding: 1rem 2.5rem;
+    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 242, 254, 0.2);
+}
+
+.btn-solid-blue:hover {
+    box-shadow: 0 8px 25px rgba(0, 242, 254, 0.4);
+    transform: translateY(-3px);
+}
+
+/* Hero Section */
+.hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding-top: 80px;
+    position: relative;
+}
+
+/* Luz de fondo abstracta */
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(0, 242, 254, 0.15) 0%, transparent 70%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+.hero h1 {
+    font-size: 4.5rem;
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    letter-spacing: -2px;
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, #ffffff 30%, var(--neon-blue) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero p {
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    margin-bottom: 2.5rem;
+    line-height: 1.6;
+    max-width: 90%;
+}
+
+/* Floating elements in Hero */
+.dashboard-img-container {
+    position: relative;
+    z-index: 10;
+}
+
+.dashboard-img {
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 40px rgba(0, 242, 254, 0.1);
+}
+
+/* Glass Cards (Módulos) */
+.glass-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 2.5rem;
+    transition: all 0.4s ease;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-10px);
+    background: #15151a;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    border-color: rgba(255,255,255,0.1);
+}
+
+.glass-card:hover::before {
+    opacity: 1;
+}
+
+.feature-icon {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--glass-border);
+}
+
+.icon-blue { color: var(--neon-blue); box-shadow: inset 0 0 20px rgba(0, 242, 254, 0.1); }
+.icon-green { color: var(--neon-green); box-shadow: inset 0 0 20px rgba(0, 242, 96, 0.1); }
+.icon-purple { color: var(--neon-purple); box-shadow: inset 0 0 20px rgba(179, 0, 255, 0.1); }
+
+.glass-card h4 {
+    font-weight: 700;
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+}
+
+.glass-card p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Banner CTA */
+.cta-section {
+    background: linear-gradient(180deg, transparent, rgba(0, 242, 254, 0.03));
+    border-top: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--glass-border);
+    padding: 5rem 0;
+}
+
+/* Footer */
+.footer {
+    padding: 3rem 0;
+    background: #020202;
+    border-top: 1px solid var(--glass-border);
+}
+
+/* Animaciones Personalizadas */
+.float-slow { animation: float-slow 6s ease-in-out infinite; }
+.float-fast { animation: float-fast 4s ease-in-out infinite; }
+
+@keyframes float-slow {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+    100% { transform: translateY(0); }
+}
+@keyframes float-fast {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+}

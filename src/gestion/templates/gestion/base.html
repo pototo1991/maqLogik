@@ -13,7 +13,12 @@
     <!-- Estilos base -->
     <link rel="stylesheet" href="{% static 'gestion/css/global.css' %}">
     <link rel="stylesheet" href="{% static 'gestion/css/sidebar.css' %}">
+    <!-- Select2 CSS para Dropdowns con Buscador -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     {% block extra_css %}{% endblock %}
+    
+    <!-- Evitar parpadeos (FOUC) leyendo preferencia de Tema temprano -->
+    <script src="{% static 'gestion/js/theme.js' %}"></script>
 </head>
 <body class="dash-body">
 
@@ -61,9 +66,11 @@
                 {% endif %}
 
                 {% if request.user.is_superuser or request.user.rol == 'OWNER' or request.user.rol == 'CHIEF' or request.user.rol == 'OPERATOR' %}
-                <a href="{% url 'checklist_list' %}" class="nav-item {% if 'checklist' in request.resolver_match.url_name %}active{% endif %}">
-                    <i class="icon">📝</i> Checklists
-                </a>
+                    {% if request.empresa.modulo_checklist %}
+                    <a href="{% url 'checklist_list' %}" class="nav-item {% if 'checklist' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="icon">📝</i> Checklists
+                    </a>
+                    {% endif %}
                 {% endif %}
 
                 {% if request.user.is_superuser or request.user.rol == 'OWNER' or request.user.rol == 'CHIEF' or request.user.rol == 'DISPATCHER' %}
@@ -73,7 +80,7 @@
                 {% endif %}
 
                 {% if request.user.is_superuser or request.user.rol == 'OWNER' or request.user.rol == 'CHIEF' or request.user.rol == 'FUEL' %}
-                    {% if request.empresa.modulo_combustible or request.user.is_superuser %}
+                    {% if request.empresa.modulo_combustible %}
                     <a href="{% url 'combustible_dashboard' %}" class="nav-item {% if 'combustible' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="icon">⛽</i> Combustible
                     </a>
@@ -81,7 +88,7 @@
                 {% endif %}
 
                 {% if request.user.is_superuser or request.user.rol == 'OWNER' or request.user.rol == 'CHIEF' or request.user.rol == 'DISPATCHER' or request.user.rol == 'FUEL' or request.user.rol == 'MECHANIC' %}
-                    {% if request.empresa.modulo_gps or request.user.is_superuser %}
+                    {% if request.empresa.modulo_gps %}
                     <a href="{% url 'mapa_live' %}" class="nav-item {% if 'mapa' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="icon">🛰️</i> Tracking GPS
                     </a>
@@ -89,7 +96,7 @@
                 {% endif %}
 
                 {% if request.user.is_superuser or request.user.rol == 'OWNER' or request.user.rol == 'CHIEF' or request.user.rol == 'MECHANIC' %}
-                    {% if request.empresa.modulo_mantencion or request.user.is_superuser %}
+                    {% if request.empresa.modulo_mantencion %}
                     <a href="{% url 'taller_dashboard' %}" class="nav-item {% if 'taller' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="icon">⚙️</i> Taller Mecánico
                     </a>
@@ -97,7 +104,7 @@
                 {% endif %}
 
                 {% if request.user.is_superuser or request.user.rol == 'OWNER' or request.user.rol == 'CHIEF' %}
-                    {% if request.empresa.modulo_reporteria or request.user.is_superuser %}
+                    {% if request.empresa.modulo_reporteria %}
                     <a href="{% url 'reportes_dashboard' %}" class="nav-item {% if 'reportes' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="icon">📑</i> Reportería PDF
                     </a>
@@ -126,12 +133,40 @@
             </div>
             
             <div class="topbar-user">
-                <div class="user-info">
-                    <span class="user-name">{{ request.user.get_full_name|default:request.user.username }}</span>
-                    <span class="user-role">{{ request.user.get_rol_display }}</span>
-                </div>
-                <div class="user-avatar">
-                    {{ request.user.username|make_list|first|upper }}
+                <!-- Toggle Button Theme -->
+                <button onclick="toggleTheme()" class="theme-toggle" aria-label="Cambiar tema" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: var(--color-text-main); margin-right: 15px; padding: 5px; border-radius: 50%; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'">
+                    <span id="theme-toggle-icon">☀️</span>
+                </button>
+
+                <!-- Avatar con Menú Contextual Dropdown -->
+                <div class="avatar-menu-wrapper" id="avatarWrapper">
+                    <div class="user-info" style="cursor: pointer;" onclick="toggleAvatarMenu()">
+                        <span class="user-name">{{ request.user.get_full_name|default:request.user.username }}</span>
+                        <span class="user-role">{{ request.user.get_rol_display }}</span>
+                    </div>
+                    <div class="user-avatar" onclick="toggleAvatarMenu()" title="Mi Cuenta" style="cursor: pointer;">
+                        {{ request.user.username|make_list|first|upper }}
+                    </div>
+
+                    <!-- Panel Dropdown -->
+                    <div class="avatar-dropdown" id="avatarDropdown">
+                        <div class="avatar-dropdown-header">
+                            <strong style="color: white; display: block; font-size: 0.95rem;">{{ request.user.get_full_name|default:request.user.username }}</strong>
+                            <span style="color: #9ca3af; font-size: 0.78rem;">{{ request.user.email|default:request.user.username }}</span>
+                        </div>
+                        <div class="avatar-dropdown-body">
+                            <a href="{% url 'mi_perfil' %}" class="avatar-dropdown-item">
+                                <span>👤</span> Mi Cuenta
+                            </a>
+                            <a href="{% url 'password_reset' %}" class="avatar-dropdown-item">
+                                <span>🔑</span> Cambiar Contraseña
+                            </a>
+                            <div class="avatar-dropdown-divider"></div>
+                            <a href="{% url 'web_logout' %}" class="avatar-dropdown-item danger">
+                                <span>🚪</span> Cerrar Sesión
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </header>
@@ -151,6 +186,26 @@
             {% endblock %}
         </div>
     </main>
+
+    <!-- Funciones base Themes/UI -->
+    <script src="{% static 'gestion/js/theme.js' %}"></script>
+    
+    <!-- Validaciones UI interactivas -->
+    <script src="{% static 'gestion/js/validaciones.js' %}"></script>
+
+    <!-- jQuery & Select2 (Dropdowns Avanzados) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Inicializar Select2 en todos los selectores de la plataforma
+            $('select').select2({
+                placeholder: "Buscar y seleccionar una opción...",
+                width: '100%',
+                allowClear: true
+            });
+        });
+    </script>
 
     {% block extra_js %}{% endblock %}
 </body>

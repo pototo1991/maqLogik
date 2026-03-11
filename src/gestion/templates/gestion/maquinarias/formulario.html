@@ -17,7 +17,6 @@
     <form method="POST">
         {% csrf_token %}
         <div class="form-grid">
-            
             {% for field in form %}
             <div class="form-group {% if field.name == 'comentarios' %}full-width{% endif %}">
                 <label for="{{ field.id_for_label }}">{{ field.label }}</label>
@@ -29,16 +28,21 @@
                 {% endif %}
             </div>
             {% endfor %}
+        </div>
 
-            <div class="form-actions">
-                <a href="{% url 'maquina_list' %}" class="btn-secondary">Cancelar</a>
-                <button type="submit" class="btn-primary" style="width:auto;">Guardar Registro</button>
-            </div>
+        <div class="form-actions-bar">
+            <a href="{% url 'maquina_list' %}" class="btn-form-cancel">← Cancelar</a>
+            <button type="submit" class="btn-form-save">💾 Guardar Registro</button>
         </div>
     </form>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<script>
+    // Variables dinámicas para el cálculo en JS
+    window.CONFIG_MANTENCION_HORAS = {{ request.user.empresa.configuracion_mantencion.intervalo_horas|default:"200" }};
+    window.CONFIG_MANTENCION_KM = {{ request.user.empresa.configuracion_mantencion.intervalo_km|default:"10000" }};
+</script>
 <script src="{% static 'gestion/js/maquinaria.js' %}"></script>
 {% endblock %}

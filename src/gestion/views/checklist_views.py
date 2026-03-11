@@ -1,8 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.paginator import Paginator
 from ..models import Checklist
 from ..forms import ChecklistForm
+import logging
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def checklist_list(request):
@@ -15,7 +19,17 @@ def checklist_list(request):
         
     checklists = qs.order_by('-fecha_revision')
     
-    return render(request, 'gestion/checklists/checklist_list.html', {'checklists': checklists})
+    # --- Paginación ---
+    paginator = Paginator(checklists, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'gestion/checklists/checklist_list.html', {
+        'checklists': page_obj,
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'is_paginated': paginator.num_pages > 1,
+    })
 
 @login_required
 def checklist_create(request):
@@ -30,8 +44,12 @@ def checklist_create(request):
             
             # Notificar dependiendo del estado de la máquina
             if not nuevo_checklist.niveles_ok or not nuevo_checklist.luces_ok or not nuevo_checklist.estructura_ok:
+                logger.warning('Checklist ID=%s con observaciones. Maquina=%s. Usuario=%s. Empresa=%s.',
+                               nuevo_checklist.pk, nuevo_checklist.maquina_id, request.user.username, request.empresa.id)
                 messages.warning(request, 'Revisión registrada con observaciones. La máquina requiere atención.')
             else:
+                logger.info('Checklist ID=%s registrado OK. Maquina=%s. Usuario=%s. Empresa=%s.',
+                            nuevo_checklist.pk, nuevo_checklist.maquina_id, request.user.username, request.empresa.id)
                 messages.success(request, 'Checklist registrado correctamente. Equipo operativo.')
                 
             return redirect('checklist_list')

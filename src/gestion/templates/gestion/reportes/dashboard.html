@@ -39,6 +39,7 @@
     </div>
 
     <!-- Reporte 2: Historial Clínico (Taller) -->
+    {% if request.empresa.modulo_mantencion %}
     <div class="report-card card-taller">
         <div class="report-icon">⚙️</div>
         <h3>Historial Clínico (Taller)</h3>
@@ -68,8 +69,10 @@
             <button type="submit" class="btn-download">💾 Generar PDF</button>
         </form>
     </div>
+    {% endif %}
 
     <!-- Reporte 3: Rendimiento de Combustible -->
+    {% if request.empresa.modulo_combustible %}
     <div class="report-card card-combustible">
         <div class="report-icon">⛽</div>
         <h3>Control de Combustible</h3>
@@ -86,6 +89,26 @@
             <button type="submit" class="btn-download">💾 Generar PDF</button>
         </form>
     </div>
+    {% endif %}
+    <!-- Reporte 4: Gastos Totales por Máquina -->
+    {% if request.empresa.modulo_combustible and request.empresa.modulo_mantencion %}
+    <div class="report-card" style="background: rgba(30, 64, 175, 0.05); border: 1px solid rgba(59, 130, 246, 0.2);">
+        <div class="report-icon" style="color: #3b82f6;">💰</div>
+        <h3>Gastos Totales por Máquina</h3>
+        <p>Consolidado Financiero. Cruza y suma automáticamente los litros cargados en el surtidor y las facturas/repuestos ingresados en el Taller Mecánico para obtener el costo operativo real.</p>
+        
+        <form action="{% url 'generar_pdf' 'gastos_totales' %}" method="get" target="_blank">
+            <div class="report-filters">
+                <label>Desde:</label>
+                <input type="date" name="fecha_inicio" value="{{ fecha_inicio_mes }}" required>
+                
+                <label>Hasta:</label>
+                <input type="date" name="fecha_fin" value="{{ fecha_hoy }}" required>
+            </div>
+            <button type="submit" class="btn-download" style="background: #3b82f6;">💾 Generar PDF</button>
+        </form>
+    </div>
+    {% endif %}
 
 </div>
 {% endblock %}

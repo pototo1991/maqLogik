@@ -208,3 +208,15 @@ SIMPLE_JWT = {
 # Configuración CORS (Móvil)
 CORS_ALLOW_ALL_ORIGINS = True  # Para producción debiese ser False con Whitelist
 
+# --- Redirecciones Web ---
+# Redirección por defecto para el decorador @login_required y LoginRequiredMixin
+LOGIN_URL = 'web_login'
+
+# --- Email Configuration (Recordatorios Automáticos) ---
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = env.str('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = env.int('EMAIL_PORT', default=587)
+EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
+EMAIL_HOST_USER = env.str('EMAIL_HOST_USER', default='tacnacamara@gmail.com')
+EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD', default='')  # Se pedirá al usuario configurarla en su .env local
+DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL', default='MaqLogik SaaS <tacnacamara@gmail.com>')

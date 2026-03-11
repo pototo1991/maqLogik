@@ -43,9 +43,9 @@
                 {% endfor %}
             </div>
 
-            <div class="form-actions">
-                <a href="{% url 'usuario_list' %}" class="btn-cancel">Cancelar</a>
-                <button type="submit" class="btn-submit">{{ btn_texto }}</button>
+            <div class="form-actions-bar">
+                <a href="{% url 'usuario_list' %}" class="btn-form-cancel">← Cancelar</a>
+                <button type="submit" class="btn-form-save">💾 {{ btn_texto }}</button>
             </div>
         </form>
     </div>

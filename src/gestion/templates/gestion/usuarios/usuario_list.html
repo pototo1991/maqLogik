@@ -10,8 +10,9 @@
 {% endblock %}
 
 {% block content %}
-<div class="header-actions">
-    <h1 style="color: white; margin: 0;">Gestión de Usuarios</h1>
+<div class="header-actions" style="display: flex; align-items: center; gap: 15px;">
+    <h1 style="color: white; margin: 0; flex-grow: 1;">Gestión de Usuarios</h1>
+    <a href="{% url 'exportar_csv' 'usuarios' %}" class="btn-sm" style="background: #10b981; color: white; border-color: #059669; padding: 10px 15px; text-decoration: none; font-weight: 500; border-radius: 8px;">📊 Exportar a Excel</a>
     <a href="{% url 'usuario_create' %}" class="btn-neon">+ Nuevo Usuario</a>
 </div>
 
@@ -59,4 +60,6 @@
         </tbody>
     </table>
 </div>
+
+{% include 'gestion/partials/pagination.html' %}
 {% endblock %}

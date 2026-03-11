@@ -95,7 +95,8 @@
 .form-card input[type="password"],
 .form-card input[type="email"],
 .form-card input[type="number"],
-.form-card select {
+.form-card select,
+.form-card textarea {
     width: 100%;
     padding: 12px 14px;
     background: rgba(0, 0, 0, 0.2);
@@ -107,10 +108,22 @@
     transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
 }
 
+.form-card textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Arreglo para opciones de Select para que no queden blancas sobre fondo claro del OS */
+.form-card select option {
+    background-color: var(--color-bg-secondary, #151A23);
+    color: var(--color-text-main, #FFFFFF);
+}
+
 .form-card input[type="text"]:focus,
 .form-card input[type="password"]:focus,
 .form-card input[type="email"]:focus,
-.form-card select:focus {
+.form-card select:focus,
+.form-card textarea:focus {
     outline: none;
     border-color: var(--color-brand, #00E676);
     background: rgba(0, 0, 0, 0.3);

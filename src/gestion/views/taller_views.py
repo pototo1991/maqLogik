@@ -7,6 +7,9 @@ from ..models import OrdenTaller, Checklist, Maquinaria
 from ..forms import OrdenTallerForm, OrdenTallerCloseForm
 from ..utils import modulo_requerido
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 @login_required(login_url='web_login')
 @modulo_requerido('modulo_mantencion')
@@ -65,6 +68,9 @@ def taller_create_ot(request):
             maquina.estado = 'TALLER'
             maquina.save(update_fields=['estado'])
             
+            logger.info('OT TALLER ID=%s ABIERTA. Maquina=%s. Tipo=%s. Mecanico=%s. Empresa=%s.',
+                        nueva_ot.pk, nueva_ot.maquina_id, nueva_ot.tipo_mantenimiento,
+                        request.user.username, request.empresa.id)
             messages.success(request, 'Máquina ingresada a Taller exitosamente. Bloqueada para operaciones en Terreno.')
             return redirect('taller_dashboard')
         else:
@@ -87,15 +93,17 @@ def taller_create_ot(request):
                 
         form = OrdenTallerForm(empresa=request.empresa, initial=initial_data)
         
-    # Extraemos las medidas actuales de las maquinas disponibles para autocompletar en el formulario
+    # Extraemos medidas y operadores de las maquinas disponibles para autocompletar en el formulario
     maquinas = form.fields['maquina'].queryset
-    medidas_map = {m.id: float(m.valor_actual_medida) for m in maquinas if m.valor_actual_medida is not None}
+    medidas_map   = {m.id: float(m.valor_actual_medida) if m.valor_actual_medida is not None else 0.0 for m in maquinas}
+    operadores_map = {m.id: m.operador_asignado.id for m in maquinas if m.operador_asignado}
 
     return render(request, 'gestion/taller/ot_form.html', {
         'form': form,
         'titulo': 'Nuevo Ingreso a Taller',
         'btn_texto': 'Ingresar a Taller',
-        'medidas_map': json.dumps(medidas_map)
+        'medidas_map': medidas_map,
+        'operadores_map': operadores_map,
     })
 
 @login_required(login_url='web_login')
@@ -118,14 +126,25 @@ def taller_close_ot(request, pk):
             # Verificamos si pidió resetear el mantenimiento
             actualizar_mantenimiento = form.cleaned_data.get('update_mantenimiento', False)
             if actualizar_mantenimiento:
-                # Sumamos el rango definido (ej. 250 horas) al valor actual
-                maquina.proximo_mantenimiento = maquina.valor_actual_medida + 250
+                # Buscar configuración de la empresa o usar defaults de seguridad
+                try:
+                    config = request.empresa.configuracion_mantencion
+                    incremento = config.intervalo_horas if maquina.unidad_medida == 'HORAS' else config.intervalo_km
+                except Exception:
+                    # En caso de que la empresa antigua no haya guardado configuración aún (retrocompatibilidad)
+                    incremento = 250 if maquina.unidad_medida == 'HORAS' else 10000
+                
+                # Sumamos el rango dinámico de la Empresa al valor actual
+                maquina.proximo_mantenimiento = maquina.valor_actual_medida + incremento
                 
             # Liberamos la máquina
             maquina.estado = 'DISPONIBLE'
             maquina.save(update_fields=['estado', 'valor_actual_medida', 'proximo_mantenimiento'])
             
             orden_cerrada.save()
+            logger.info('OT TALLER ID=%s CERRADA. Maquina=%s. Mantenimiento_reset=%s. Mecanico=%s. Empresa=%s.',
+                        orden_cerrada.pk, maquina.id, actualizar_mantenimiento,
+                        request.user.username, request.empresa.id)
             messages.success(request, 'Orden de Taller finalizada. Máquina liberada, mantenimiento recalculado y lista para operar.')
             return redirect('taller_dashboard')
     else:
@@ -146,6 +165,8 @@ def taller_update_estado(request, pk):
         if nuevo_estado in dict(OrdenTaller.ESTADOS_TALLER).keys() and nuevo_estado != 'FINALIZADO':
             orden.estado = nuevo_estado
             orden.save(update_fields=['estado'])
+            logger.info('OT TALLER ID=%s cambio estado a %s. Usuario=%s. Empresa=%s.',
+                        pk, nuevo_estado, request.user.username, request.empresa.id)
             messages.success(request, f'Estado de Equipo actualizado a: {orden.get_estado_display()}')
     return redirect('taller_dashboard')
 

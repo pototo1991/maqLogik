@@ -29,6 +29,9 @@
             <div class="form-group" id="group_{{ field.name }}">
                 <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                 {{ field }}
+                {% if field.help_text %}
+                    <small class="form-text text-muted" style="display: block; margin-top: 5px; color: #9ca3af; font-size: 0.85rem;">{{ field.help_text|safe }}</small>
+                {% endif %}
                 {% if field.errors %}
                     <ul class="error-list">
                     {% for error in field.errors %}
@@ -39,9 +42,9 @@
             </div>
             {% endfor %}
 
-            <div class="form-actions">
-                <a href="{% url 'combustible_dashboard' %}" class="btn-cancel">Cancelar</a>
-                <button type="submit" class="btn-submit">Guardar Registro</button>
+            <div class="form-actions-bar">
+                <a href="{% url 'combustible_dashboard' %}" class="btn-form-cancel">← Cancelar</a>
+                <button type="submit" class="btn-form-save">💾 Guardar Registro</button>
             </div>
         </form>
     </div>

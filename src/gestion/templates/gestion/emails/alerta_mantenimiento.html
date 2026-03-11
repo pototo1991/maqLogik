@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <!-- Los estilos han sido extraídos a un archivo separado, pero recuerda que para que los clientes de correo (Gmail, Outlook) los interpreten bien o si los compilas, el CSS debe ser inline. Si usas un inliner automático, esta etiqueta será transformada. -->
+    <link rel="stylesheet" href="{{ request.scheme }}://{{ request.get_host }}/static/gestion/css/email_alerta.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Alerta Preventiva MaqLogik</h1>
+        </div>
+        <div class="content">
+            <p>Hola Equipo de <strong>{{ empresa.nombre_fantasia }}</strong>,</p>
+            
+            <div class="alert-box">
+                <strong>Atención:</strong> El siguiente equipo de su flota está próximo a alcanzar el límite de su mantenimiento preventivo recomendado por manual.
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Equipo</th>
+                        <th>Lectura Actual</th>
+                        <th>Rango Crítico</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alerta in alertas %}
+                    <tr>
+                        <td><strong>{{ alerta.maquina.id_interno }}</strong> ({{ alerta.maquina.tipo|default:"General" }})</td>
+                        <td>{{ alerta.maquina.valor_actual_medida }} {{ alerta.maquina.get_tipo_medida_display|default:"horas" }}</td>
+                        <td class="critical">Faltan {{ alerta.faltan }} unid.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div style="text-align: center;">
+                <a href="http://maqlogik.com/login/" class="btn">Ingresar a Taller Mecánico</a>
+            </div>
+        </div>
+        <div class="footer">
+            <p>Este es un correo automático generado por MaqLogik SaaS.<br>Puede modificar estas alertas en su panel de configuración.</p>
+        </div>
+    </div>
+</body>
+</html>

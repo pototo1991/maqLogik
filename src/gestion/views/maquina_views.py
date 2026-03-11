@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
+from django.core.paginator import Paginator
 from ..models import Maquinaria
 from ..forms import MaquinariaForm
 import logging
@@ -36,9 +37,17 @@ def maquina_list(request):
 
     maquinarias = maquinarias.order_by(order_string)
     
+    # --- Paginación ---
+    paginator = Paginator(maquinarias, 20) # 20 ítems por página
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     logger.info(f"AUDITORÍA - Acceso a Listado de Maquinarias. Búsqueda: '{search_query}'. Por: '{request.user.username}'")
     return render(request, 'gestion/maquinarias/lista.html', {
-        'maquinarias': maquinarias,
+        'maquinarias': page_obj, # Cambiamos maquinarias completas por el objeto página
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'is_paginated': paginator.num_pages > 1,
         'current_sort': sort_by,
         'current_dir': direction
     })

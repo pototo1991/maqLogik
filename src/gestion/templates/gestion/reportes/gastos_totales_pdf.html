@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Reporte de Gastos Consolidados</title>
+    <style>
+        {% include "gestion/reportes_pdf_inline.css" %}
+    </style>
+</head>
+<body class="pdf-gastos">
+
+    <div id="header_content">
+        <div style="float: left; font-weight: bold; color: #10b981; font-size: 14px;">MaqLogik SaaS</div>
+        <div style="float: right; color: #64748b;">Analítica de Costos Dinámicos</div>
+    </div>
+
+    <div id="footer_content">
+        Impreso el: {{ fecha_generacion }} | Página <pdf:pagenumber> de <pdf:pagecount>
+    </div>
+
+    <!-- CUERPO PRINCIPAL -->
+    <h1>Gastos Totales por Máquina (Consolidado)</h1>
+    <div class="empresa-info">
+        <strong>Empresa:</strong> {{ empresa.nombre_fantasia }} | <strong>RUT:</strong> {{ empresa.rut_empresa }}
+    </div>
+    
+    <div class="filtros-aplicados">
+        <strong>Periodo de Evaluación:</strong> {{ fecha_inicio }} - {{ fecha_fin }}<br>
+        <strong>Generado por:</strong> {{ usuario.get_full_name|default:usuario.username }}
+    </div>
+
+    <h2>Resumen Ejecutivo de la Flota</h2>
+    <table class="metric-cards">
+        <tr>
+            <td>
+                Total Gastos Combustible<br>
+                <div class="metric-num text-danger">${{ total_combustible }}</div>
+            </td>
+            <td>
+                Total Gastos Taller<br>
+                <div class="metric-num text-warning">${{ total_taller }}</div>
+            </td>
+            <td>
+                Inversión Total del Periodo<br>
+                <div class="metric-num text-primary">${{ total_general }}</div>
+            </td>
+        </tr>
+    </table>
+
+    <br> <!-- Salto de Línea -->
+
+    <h2>Detalle de Inversión por Activo Fijo</h2>
+    {% if gastos %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Máquina / Vehículo</th>
+                <th>Familia</th>
+                <th>Costo Combustible ($)</th>
+                <th>Costo Mantenimiento ($)</th>
+                <th>Total Invertido ($)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for g in gastos %}
+            <tr>
+                <td><strong>{{ g.maquina }}</strong></td>
+                <td>{{ g.tipo|default:"General" }}</td>
+                <td class="text-right">${{ g.combustible }}</td>
+                <td class="text-right">${{ g.taller }}</td>
+                <td class="text-right" style="font-weight: bold; color: #b91c1c;">${{ g.total }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: #64748b; font-style: italic;">No hay registros de gastos (ni en taller ni en combustible) para el periodo seleccionado.</p>
+    {% endif %}
+
+</body>
+</html>

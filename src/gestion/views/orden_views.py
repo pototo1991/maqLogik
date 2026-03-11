@@ -2,9 +2,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 from django.utils import timezone
+from django.db.models import F
 from ..models import OrdenTrabajo
 from ..forms import OrdenTrabajoSalidaForm, OrdenTrabajoEntradaForm
+import logging
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def orden_list(request):
@@ -18,7 +23,8 @@ def orden_list(request):
         
     order_string = f"-{sort_by}" if direction == 'desc' else sort_by
 
-    ordenes = OrdenTrabajo.objects.filter(empresa=request.empresa).order_by(order_string)
+    # Orden personalizado: 1ro Las Incompletas (En Ruta - sin fecha_entrada), 2do Orden dinámico elegido
+    ordenes = OrdenTrabajo.objects.filter(empresa=request.empresa).order_by(F('fecha_entrada').asc(nulls_first=True), order_string)
     
     # --- Integración: Alertas Operativas de Horario (Anti-Robo / Fuera de turno) ---
     ahora_local = timezone.localtime(timezone.now())
@@ -40,9 +46,17 @@ def orden_list(request):
             
         if hora_actual >= 19:
             alertas_rezagados.append(ot)
+            
+    # --- Paginación ---
+    paginator = Paginator(ordenes, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     
     return render(request, 'gestion/ordenes/orden_list.html', {
-        'ordenes': ordenes,
+        'ordenes': page_obj,
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'is_paginated': paginator.num_pages > 1,
         'current_sort': sort_by,
         'current_dir': direction,
         'alertas_madrugadores': alertas_madrugadores,
@@ -70,9 +84,14 @@ def orden_create(request):
                 maquina.estado = 'EN_RUTA'
                 maquina.save(update_fields=['estado'])
                 
+                logger.info('OT ID=%s ABIERTA. Maquina=%s. Operador=%s. Usuario=%s. Empresa=%s.',
+                            nueva_orden.pk, nueva_orden.maquina_id, nueva_orden.operador_id,
+                            request.user.username, request.empresa.id)
                 messages.success(request, 'Orden de Trabajo (Salida) generada correctamente.')
                 return redirect('orden_list')
             except ValidationError as e:
+                logger.warning('OT BLOQUEADA por validación. Maquina=%s. Usuario=%s. Error=%s.',
+                               form.cleaned_data.get('maquina'), request.user.username, str(e))
                 # Mostrar el error específico proveniente del model validation (Ej. Falta checklist o fallas criticas)
                 messages.error(request, e.message if hasattr(e, 'message') else str(e))
         else:
@@ -80,7 +99,6 @@ def orden_create(request):
     else:
         form = OrdenTrabajoSalidaForm(empresa=request.empresa)
         
-    import json
     maquinas = form.fields['maquina'].queryset
     operadores_map = {m.id: m.operador_asignado.id for m in maquinas if m.operador_asignado}
     medidas_map = {m.id: float(m.valor_actual_medida) for m in maquinas if m.valor_actual_medida is not None}
@@ -89,8 +107,8 @@ def orden_create(request):
         'form': form,
         'titulo': 'Nueva Orden de Trabajo (Salida)',
         'btn_texto': 'Registrar Salida',
-        'operadores_map': json.dumps(operadores_map),
-        'medidas_map': json.dumps(medidas_map)
+        'operadores_map': operadores_map,
+        'medidas_map': medidas_map
     })
 
 @login_required
@@ -115,6 +133,9 @@ def orden_close(request, pk):
                 maquina.estado = 'DISPONIBLE'
                 maquina.save(update_fields=['valor_actual_medida', 'estado'])
                 
+                logger.info('OT ID=%s CERRADA. Maquina=%s. Medida_entrada=%s. Usuario=%s. Empresa=%s.',
+                            orden_cerrada.pk, orden_cerrada.maquina_id, orden_cerrada.medida_entrada,
+                            request.user.username, request.empresa.id)
                 messages.success(request, 'Orden de Trabajo cerrada exitosamente. Máquina disponible.')
                 return redirect('orden_list')
     else:

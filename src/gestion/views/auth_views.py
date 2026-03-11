@@ -21,6 +21,18 @@ def web_login(request):
         
         user = authenticate(request, username=rut_usuario, password=clave)
         if user is not None:
+            # Validación de Módulos vs Rol del Usuario
+            if not user.is_superuser and user.empresa:
+                if user.rol == 'MECHANIC' and not user.empresa.modulo_mantencion:
+                    logger.warning(f"AUDITORÍA - Login bloqueado: Usuario '{user.username}' intentó entrar como Mecánico, pero la empresa {user.empresa.nombre_fantasia} tiene el módulo Taller apagado.")
+                    messages.error(request, 'Acceso Denegado: Su empresa no tiene contratado o ha desactivado el Módulo de Taller Mecánico.')
+                    return render(request, 'gestion/auth/login.html')
+                
+                if user.rol == 'FUEL' and not user.empresa.modulo_combustible:
+                    logger.warning(f"AUDITORÍA - Login bloqueado: Usuario '{user.username}' intentó entrar como Cargador, pero la empresa {user.empresa.nombre_fantasia} tiene el módulo Combustible apagado.")
+                    messages.error(request, 'Acceso Denegado: Su empresa no tiene contratado o ha desactivado el Módulo de Combustible.')
+                    return render(request, 'gestion/auth/login.html')
+
             login(request, user)
             logger.info(f"AUDITORÍA - Login Web Exitoso: Usuario '{user.username}' ({user.get_rol_display()}) de la empresa '{user.empresa.nombre_fantasia if user.empresa else 'System Admin'}'.")
             
@@ -45,3 +57,29 @@ def web_logout(request):
     response = redirect('web_login')
     response.delete_cookie('sessionid')
     return response
+
+
+from django.contrib.auth.decorators import login_required
+from ..forms import PerfilForm
+
+@login_required
+def mi_perfil(request):
+    """
+    Vista para que el usuario vea y edite sus datos personales básicos.
+    Campos editables: nombres, apellido, email, teléfono.
+    Campos de solo lectura: rol, estado, RUT, empresa.
+    """
+    if request.method == 'POST':
+        form = PerfilForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '✅ Tu perfil ha sido actualizado correctamente.')
+            logger.info(f"AUDITORÍA - Perfil actualizado: Usuario '{request.user.username}' actualizó sus datos personales.")
+            return redirect('mi_perfil')
+        else:
+            messages.error(request, 'Por favor corrige los errores del formulario.')
+    else:
+        form = PerfilForm(instance=request.user)
+    
+    return render(request, 'gestion/auth/mi_perfil.html', {'form': form})
+

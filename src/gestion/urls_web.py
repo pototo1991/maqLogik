@@ -1,11 +1,20 @@
 from django.urls import path
+from django.contrib.auth import views as auth_views
 from . import views
+from .views.landing_views import landing_page
 
 urlpatterns = [
-    path('', views.web_login, name='home'),  # Redirección raíz al login
+    path('', landing_page, name='home'),  # Landing Page Pública
     path('login/', views.web_login, name='web_login'),
     path('logout/', views.web_logout, name='web_logout'),
+    path('perfil/', views.mi_perfil, name='mi_perfil'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    
+    # --- Auth: Recuperación de Contraseña ---
+    path('password_reset/', auth_views.PasswordResetView.as_view(template_name='gestion/auth/password_reset_form.html', email_template_name='gestion/auth/password_reset_email.html', success_url='/password_reset/done/'), name='password_reset'),
+    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='gestion/auth/password_reset_done.html'), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='gestion/auth/password_reset_confirm.html', success_url='/reset/done/'), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='gestion/auth/password_reset_complete.html'), name='password_reset_complete'),
     
     # --- Maquinarias ---
     path('maquinarias/', views.maquina_list, name='maquina_list'),
@@ -53,6 +62,9 @@ urlpatterns = [
     path('root/empresa/<int:empresa_id>/modulos/', views.root_edit_modules, name='root_edit_modules'),
     path('root/empresa/<int:empresa_id>/owner/', views.root_manage_owner, name='root_manage_owner'),
     path('root/empresa/<int:empresa_id>/toggle-status/', views.root_toggle_empresa_status, name='root_toggle_empresa_status'),
+    
+    # --- Exportaciones CSV Genéricas ---
+    path('exportar/csv/<str:tipo>/', views.exportar_csv, name='exportar_csv'),
     
     # --- Impersonation (Ver como Cliente) ---
     path('root/empresa/<int:empresa_id>/impersonate/', views.root_impersonate, name='root_impersonate'),

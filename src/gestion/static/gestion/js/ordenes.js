@@ -21,14 +21,20 @@ document.addEventListener('DOMContentLoaded', function() {
         medidasMapOT = JSON.parse(medidasData.textContent || "{}");
     }
 
-    if (selectMaquina && Object.keys(operadoresMapOT).length >= 0) {
-        selectMaquina.addEventListener('change', function() {
+    if (selectMaquina) {
+        // Usar jQuery para escuchar el evento 'change' porque Select2 emite eventos jQuery
+        $('#id_maquina').on('change', function() {
             const maquinaId = this.value;
             
             // 1. Auto-asignar Operador
-            if (selectOperador) {
+            if (selectOperador && Object.keys(operadoresMapOT).length >= 0) {
                 if (maquinaId && operadoresMapOT[maquinaId]) {
-                    selectOperador.value = operadoresMapOT[maquinaId];
+                    // Si Select2 está activo en el selector de operador, hay que actualizarlo vía jQuery
+                    if ($(selectOperador).hasClass('select2-hidden-accessible')) {
+                        $(selectOperador).val(operadoresMapOT[maquinaId]).trigger('change');
+                    } else {
+                        selectOperador.value = operadoresMapOT[maquinaId];
+                    }
                     selectOperador.style.transition = 'border-color 0.3s, box-shadow 0.3s';
                     selectOperador.style.borderColor = '#10b981';
                     selectOperador.style.boxShadow = '0 0 5px rgba(16, 185, 129, 0.5)';
@@ -37,7 +43,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         selectOperador.style.boxShadow = '';
                     }, 2000);
                 } else {
-                    selectOperador.value = '';
+                    if ($(selectOperador).hasClass('select2-hidden-accessible')) {
+                        $(selectOperador).val('').trigger('change');
+                    } else {
+                        selectOperador.value = '';
+                    }
                 }
             }
 

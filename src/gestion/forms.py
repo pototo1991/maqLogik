@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import Maquinaria, Usuario, Checklist, OrdenTrabajo, CompraCombustible, CombustibleLog, OrdenTaller, Empresa
+from .models import Maquinaria, Usuario, Checklist, OrdenTrabajo, CompraCombustible, CombustibleLog, OrdenTaller, Empresa, ConfiguracionMantencion
 import re
 
 def validar_rut_chileno(rut_str):
@@ -56,6 +56,19 @@ class EmpresaForm(forms.ModelForm):
             if not validar_rut_chileno(rut):
                 raise forms.ValidationError('El RUT de la empresa ingresado no es válido matemáticamente.')
         return rut
+
+class ConfiguracionMantencionForm(forms.ModelForm):
+    class Meta:
+        model = ConfiguracionMantencion
+        fields = ['intervalo_horas', 'intervalo_km']
+        labels = {
+            'intervalo_horas': 'Intervalo de Mantención Preventiva (Horas)',
+            'intervalo_km': 'Intervalo de Mantención Preventiva (Km)'
+        }
+        widgets = {
+            'intervalo_horas': forms.NumberInput(attrs={'class': 'form-input', 'step': '1', 'min': '1', 'placeholder': 'Ej. 200'}),
+            'intervalo_km': forms.NumberInput(attrs={'class': 'form-input', 'step': '1', 'min': '1', 'placeholder': 'Ej. 10000'})
+        }
 
 class MaquinariaForm(forms.ModelForm):
     class Meta:
@@ -165,13 +178,14 @@ class UsuarioUpdateForm(forms.ModelForm):
 class ChecklistForm(forms.ModelForm):
     class Meta:
         model = Checklist
-        fields = ['maquina', 'niveles_ok', 'luces_ok', 'estructura_ok', 'comentarios']
+        fields = ['maquina', 'niveles_ok', 'luces_ok', 'estructura_ok', 'comentarios', 'firma_operador']
         widgets = {
             'maquina': forms.Select(attrs={'class': 'form-input'}),
             'niveles_ok': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
             'luces_ok': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
             'estructura_ok': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
             'comentarios': forms.Textarea(attrs={'class': 'form-input', 'rows': 3, 'placeholder': 'Ej. Foco izquierdo quebrado, fuga de aceite mínima...'}),
+            'firma_operador': forms.HiddenInput(attrs={'id': 'firma_operador'}),
         }
 
     def __init__(self, *args, empresa=None, **kwargs):
@@ -195,12 +209,23 @@ class OrdenTrabajoSalidaForm(forms.ModelForm):
     def __init__(self, *args, empresa=None, **kwargs):
         super().__init__(*args, **kwargs)
         if empresa:
-            # Solo máquinas disponibles (No en taller ni ya en ruta - a menos que lo permitas, asumimos disponibles)
-            self.fields['maquina'].queryset = Maquinaria.objects.filter(empresa=empresa, estado='DISPONIBLE')
+            # IMPORTANTE: Usamos Maquinaria._default_manager para bypassear el
+            # EmpresaManager (que ya filtra por empresa en el middleware).
+            # Hacemos el filtro directo para evitar doble filtro en blanco.
+            maquinas_disponibles = Maquinaria._default_manager.filter(
+                empresa=empresa,
+                estado__in=['DISPONIBLE']
+            )
+            self.fields['maquina'].queryset = maquinas_disponibles
             self.fields['maquina'].empty_label = "Seleccione Máquina en Patio"
             
-            # Solo operadores (Puedes ajustarlo para despachadores también)
-            self.fields['operador'].queryset = Usuario.objects.filter(empresa=empresa, rol='OPERATOR')
+            # Solo operadores activos (rol OPERATOR o DISPATCHER según la empresa)
+            operadores = Usuario._default_manager.filter(
+                empresa=empresa,
+                rol__in=['OPERATOR', 'DISPATCHER'],
+                estado='DISPONIBLE'
+            )
+            self.fields['operador'].queryset = operadores
             self.fields['operador'].empty_label = "Asignar a un Operador"
 
 class OrdenTrabajoEntradaForm(forms.ModelForm):
@@ -226,10 +251,11 @@ class CompraCombustibleForm(forms.ModelForm):
 class CombustibleLogForm(forms.ModelForm):
     class Meta:
         model = CombustibleLog
-        fields = ['tipo_carga', 'tipo_documento', 'numero_documento', 'orden_trabajo', 'maquina', 'operador', 'litros', 'precio_unitario', 'costo_total', 'medida_al_cargar']
+        fields = ['tipo_carga', 'tipo_documento', 'numero_documento', 'orden_trabajo', 'maquina', 'operador', 'litros', 'precio_unitario', 'costo_total', 'medida_al_cargar', 'sello_flujometro']
         labels = {
             'precio_unitario': 'Precio Litro',
             'orden_trabajo': 'Orden de Trabajo (Opcional)',
+            'sello_flujometro': 'Número de Sello',
         }
         widgets = {
             'tipo_carga': forms.Select(attrs={'class': 'form-input', 'id': 'tipo_carga_select'}),
@@ -242,6 +268,7 @@ class CombustibleLogForm(forms.ModelForm):
             'precio_unitario': forms.NumberInput(attrs={'class': 'form-input', 'step': '1', 'id': 'precio_unitario_input', 'placeholder': 'Dejar vacío si es INTERNA'}),
             'costo_total': forms.NumberInput(attrs={'class': 'form-input', 'step': '1', 'id': 'costo_total_input', 'placeholder': 'Auto-calculado (Externa)'}),
             'medida_al_cargar': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.1', 'placeholder': 'Horómetro/Km actual de la máquina'}),
+            'sello_flujometro': forms.NumberInput(attrs={'class': 'form-input', 'id': 'sello_flujometro_input', 'placeholder': 'Obligatorio en Carga Interna'}),
         }
 
     def __init__(self, *args, empresa=None, **kwargs):
@@ -254,9 +281,38 @@ class CombustibleLogForm(forms.ModelForm):
             self.fields['orden_trabajo'].queryset = OrdenTrabajo.objects.filter(empresa=empresa).order_by('-id')
             self.fields['orden_trabajo'].empty_label = "Sin Orden Asignada"
         
+        # Buscamos el último sello de flujómetro de la Empresa para validarlo
+        self.ultimo_sello = None
+        if empresa:
+            ultimo_log = CombustibleLog.objects.filter(
+                empresa=empresa, 
+                tipo_carga='INTERNA', 
+                sello_flujometro__isnull=False
+            ).order_by('-id').first()
+            
+            if ultimo_log:
+                self.ultimo_sello = ultimo_log.sello_flujometro
+                self.fields['sello_flujometro'].widget.attrs['placeholder'] = f'Último Sello: {self.ultimo_sello}'
+                self.fields['sello_flujometro'].help_text = f"El sello anterior fue: <strong>{self.ultimo_sello}</strong>. El nuevo sello debe ser un número mayor."
+            else:
+                self.fields['sello_flujometro'].help_text = "Ingrese el primer sello del mes."
+                
         # Hacemos los campos de precio no requeridos porque se calculan en backend si la carga es INTERNA
         self.fields['precio_unitario'].required = False
         self.fields['costo_total'].required = False
+
+    def clean(self):
+        cleaned_data = super().clean()
+        tipo_carga = cleaned_data.get('tipo_carga')
+        sello_flujometro = cleaned_data.get('sello_flujometro')
+        
+        if tipo_carga == 'INTERNA':
+            if sello_flujometro is None:
+                self.add_error('sello_flujometro', "El Número de Sello es OBLIGATORIO para las Cargas Internas.")
+            elif self.ultimo_sello is not None and sello_flujometro <= self.ultimo_sello:
+                self.add_error('sello_flujometro', f"Error: El Número de Sello ({sello_flujometro}) debe ser MAYOR al último registrado ({self.ultimo_sello}).")
+        
+        return cleaned_data
 
 
 class OrdenTallerForm(forms.ModelForm):
@@ -295,3 +351,33 @@ class OrdenTallerCloseForm(forms.ModelForm):
             'costo_total': forms.NumberInput(attrs={'class': 'form-input', 'step': '1', 'placeholder': 'Ej. 150000'}),
             'medida_salida': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.1', 'placeholder': 'Horómetro/Km al entregar'}),
         }
+
+
+class PerfilForm(forms.ModelForm):
+    """
+    Formulario que permite al usuario editar sus propios datos básicos.
+    Excluye campos sensibles como rol, estado y empresa (solo editables por Admin).
+    """
+    class Meta:
+        model = Usuario
+        fields = ['first_name', 'last_name', 'email', 'telefono']
+        labels = {
+            'first_name': 'Nombre',
+            'last_name': 'Apellido',
+            'email': 'Correo Electrónico',
+            'telefono': 'Teléfono / Celular',
+        }
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Tu nombre'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Tu apellido'}),
+            'email': forms.EmailInput(attrs={'class': 'form-input', 'placeholder': 'correo@empresa.com'}),
+            'telefono': forms.TextInput(attrs={'class': 'form-input', 'placeholder': '+56 9 XXXX XXXX'}),
+        }
+
+    def save(self, commit=True):
+        usuario = super().save(commit=False)
+        # Sincronizar nombre_completo con first_name + last_name
+        usuario.nombre_completo = f"{usuario.first_name} {usuario.last_name}".strip()
+        if commit:
+            usuario.save()
+        return usuario

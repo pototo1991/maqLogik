@@ -1,0 +1,36 @@
+<!-- Paginación Reutilizable -->
+{% if is_paginated %}
+<div class="pagination-container">
+    <div class="pagination-info">
+        Mostrando página <strong>{{ page_obj.number }}</strong> de <strong>{{ paginator.num_pages }}</strong>
+        (Total: {{ paginator.count }} registros)
+    </div>
+    
+    <div class="pagination-links">
+        {% if page_obj.has_previous %}
+            <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.dir %}&dir={{ request.GET.dir }}{% endif %}" class="btn-page">&laquo; Inicio</a>
+            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.dir %}&dir={{ request.GET.dir }}{% endif %}" class="btn-page">Anterior</a>
+        {% else %}
+            <span class="btn-page disabled">&laquo; Inicio</span>
+            <span class="btn-page disabled">Anterior</span>
+        {% endif %}
+        
+        <!-- Páginas Intermedias (Abreviadas) -->
+        {% for num in paginator.page_range %}
+            {% if num == page_obj.number %}
+                <span class="btn-page active">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.dir %}&dir={{ request.GET.dir }}{% endif %}" class="btn-page">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.dir %}&dir={{ request.GET.dir }}{% endif %}" class="btn-page">Siguiente</a>
+            <a href="?page={{ paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.dir %}&dir={{ request.GET.dir }}{% endif %}" class="btn-page">Fin &raquo;</a>
+        {% else %}
+            <span class="btn-page disabled">Siguiente</span>
+            <span class="btn-page disabled">Fin &raquo;</span>
+        {% endif %}
+    </div>
+</div>
+{% endif %}

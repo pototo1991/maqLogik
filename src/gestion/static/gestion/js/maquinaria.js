@@ -29,12 +29,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const unidad = inputUnidad.value;
+        
+        // Obtener la configuración dinámica de la empresa, o usar defaults de seguridad
+        const limiteHoras = window.CONFIG_MANTENCION_HORAS || 200;
+        const limiteKm = window.CONFIG_MANTENCION_KM || 10000;
+
         if (unidad === 'HORAS') {
-            // Generalmente según fabricante son 200 horas, el usuario indicó diferencia de 200 en el ejemplo (125 a 325 es 200, pero el estandar general es sumar +200). Usaremos un estandar de +200 o lo que calculó matematicamente + 200. Vamos a sumar 200 horas como estándar y 10000 en KMS. 
-            // Espera, el usuario dijo: "si (...) se ingresa 125 horas que el campo (...) muestre 325". Esto es literalmente sumar 200.
-            inputProximo.value = (valorActual + 200).toFixed(1);
+            inputProximo.value = (valorActual + limiteHoras).toFixed(1);
         } else if (unidad === 'KM') {
-            inputProximo.value = (valorActual + 10000).toFixed(1);
+            inputProximo.value = (valorActual + limiteKm).toFixed(1);
         } else {
             inputProximo.value = '';
         }

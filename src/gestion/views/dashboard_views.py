@@ -21,7 +21,10 @@ def dashboard(request):
     elif rol == 'DISPATCHER':
         return redirect('orden_list')
     elif rol in ['FUEL', 'MECHANIC']:
-        return redirect('combustible_dashboard') # Temporalmente mecánico va a combustible o tracking (GPS no es indexable por ahora)
+        # Solo redirigir si TIENEN el módulo contratado, de otra forma déjalos en el dashboard
+        if getattr(request.empresa, 'modulo_combustible', False):
+            return redirect('combustible_dashboard')
+        # Si no lo tiene, se renderiza el dashboard vacío o con mensajes de error
     # Filtro automático por empresa (EmpresaManager)
     total_maquinas = Maquinaria.objects.count()
     maquinas_en_ruta = Maquinaria.objects.filter(estado='EN_RUTA').count()
