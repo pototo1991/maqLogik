@@ -101,7 +101,7 @@
                 <th style="white-space: nowrap;"><a href="{% sort_url 'fecha_salida' current_sort current_dir %}" style="color: inherit; text-decoration: none;">Estado / Fecha{% sort_icon 'fecha_salida' current_sort current_dir %}</a></th>
                 <th style="white-space: nowrap;"><a href="{% sort_url 'maquina__id_interno' current_sort current_dir %}" style="color: inherit; text-decoration: none;">Máquina{% sort_icon 'maquina__id_interno' current_sort current_dir %}</a></th>
                 <th style="white-space: nowrap;"><a href="{% sort_url 'operador__username' current_sort current_dir %}" style="color: inherit; text-decoration: none;">Operador{% sort_icon 'operador__username' current_sort current_dir %}</a></th>
-                <th style="white-space: nowrap;"><a href="{% sort_url 'nro_guia_despacho' current_sort current_dir %}" style="color: inherit; text-decoration: none;">N° Guía{% sort_icon 'nro_guia_despacho' current_sort current_dir %}</a></th>
+                <th style="white-space: nowrap;"><a href="{% sort_url 'id' current_sort current_dir %}" style="color: inherit; text-decoration: none;">N° OT / Guía{% sort_icon 'id' current_sort current_dir %}</a></th>
                 <th style="white-space: nowrap;"><a href="{% sort_url 'medida_salida' current_sort current_dir %}" style="color: inherit; text-decoration: none;">Salida (Hora/Medida){% sort_icon 'medida_salida' current_sort current_dir %}</a></th>
                 <th style="white-space: nowrap;">Llegada (Hora/Medida)</th>
                 <th style="white-space: nowrap;">Acciones</th>
@@ -124,7 +124,14 @@
                     <div class="text-dim">{{ o.maquina.patente|default:"Sin Patente" }}</div>
                 </td>
                 <td>{{ o.operador.get_full_name|default:o.operador.username }}</td>
-                <td>{{ o.nro_guia_despacho }}</td>
+                <td>
+                    <div style="font-weight: bold; font-size: 1.05rem; color: #60a5fa;">
+                        {% if o.correlativo %}OT-{{ o.correlativo|stringformat:"04d" }}{% else %}OT-{{ o.id }}{% endif %}
+                    </div>
+                    {% if o.nro_guia_despacho %}
+                    <div class="text-dim mt-1" style="font-size: 0.8rem;"><i class="icon">📄</i> {{ o.nro_guia_despacho }}</div>
+                    {% endif %}
+                </td>
                 
                 <td>
                     <strong>{{ o.medida_salida }}</strong> {{ o.maquina.get_unidad_medida_display }}

@@ -139,13 +139,15 @@ class OrdenTrabajo(models.Model):
     fecha_entrada = models.DateTimeField(null=True, blank=True)
     medida_salida = models.DecimalField(max_digits=15, decimal_places=2)
     medida_entrada = models.DecimalField(max_digits=15, decimal_places=2, null=True)
-    nro_guia_despacho = models.CharField(max_length=50, help_text="Número de documento emitido por comercial/vendedor")
+    correlativo = models.PositiveIntegerField(null=True, blank=True, help_text="Número correlativo interno por empresa")
+    nro_guia_despacho = models.CharField(max_length=50, blank=True, null=True, help_text="Número de documento manual (Opcional)")
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
 
     objects = EmpresaManager()
 
     def __str__(self):
-        return f"OT #{self.id} | Maq: {self.maquina.id_interno} | Guía N°: {self.nro_guia_despacho}"
+        correlativo_str = f"OT-{self.correlativo:04d}" if self.correlativo else f"OT #{self.id}"
+        return f"{correlativo_str} | Maq: {self.maquina.id_interno}"
 
     def clean(self):
         super().clean()
@@ -165,6 +167,10 @@ class OrdenTrabajo(models.Model):
 
     def save(self, *args, **kwargs):
         self.clean()
+        if not self.pk and not self.correlativo:
+            # Autogenerar correlativo interno por empresa (Ej: 1, 2, 3...)
+            ultimo = OrdenTrabajo._default_manager.filter(empresa=self.empresa).order_by('-correlativo').first()
+            self.correlativo = (ultimo.correlativo + 1) if ultimo and ultimo.correlativo else 1
         super().save(*args, **kwargs)
 
 # 6. GPS LOGS

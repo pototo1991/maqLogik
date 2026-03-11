@@ -203,7 +203,10 @@ class OrdenTrabajoSalidaForm(forms.ModelForm):
             'maquina': forms.Select(attrs={'class': 'form-input'}),
             'operador': forms.Select(attrs={'class': 'form-input'}),
             'medida_salida': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.1', 'placeholder': 'Ej. 5200.5 (Horas/Km actuales)'}),
-            'nro_guia_despacho': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej. GD-10293'}),
+            'nro_guia_despacho': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej. GD-10293 (Opcional)'}),
+        }
+        labels = {
+            'nro_guia_despacho': 'N° de Guía Física (Opcional)',
         }
 
     def __init__(self, *args, empresa=None, **kwargs):
