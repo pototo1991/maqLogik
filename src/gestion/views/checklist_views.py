@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from ..models import Checklist
+from ..models import Checklist, Maquinaria
 from ..forms import ChecklistForm
 import logging
 
@@ -56,7 +56,13 @@ def checklist_create(request):
         else:
             messages.error(request, 'Error al registrar la revisión.')
     else:
-        form = ChecklistForm(empresa=request.empresa)
+        # Preseleccionar máquina asignada al operador
+        initial_data = {}
+        maquina_asignada = Maquinaria.objects.filter(empresa=request.empresa, operador_asignado=request.user, estado='DISPONIBLE').first()
+        if maquina_asignada:
+            initial_data['maquina'] = maquina_asignada.id
+
+        form = ChecklistForm(initial=initial_data, empresa=request.empresa)
     
     import json
     # Mapeo de operador fijo por máquina para autocompletar en frontend

@@ -121,7 +121,19 @@
                 <span>Dueño<br>Owner</span>
             </a>
         </div>
+        
+        <div style="margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <a href="{% url 'root_import_usuarios' empresa.id %}" class="btn-card-action" style="border: 1px dashed rgba(255,255,255,0.3); color: white; background: rgba(255,255,255,0.02); font-size: 0.8rem; padding: 10px;">
+                <i class="icon">👥</i>
+                <span>Importar Empleados</span>
+            </a>
+            <a href="{% url 'root_import_maquinarias' empresa.id %}" class="btn-card-action" style="border: 1px dashed rgba(16, 185, 129, 0.5); color: #10b981; background: rgba(16, 185, 129, 0.05); font-size: 0.8rem; padding: 10px;">
+                <i class="icon">🚜</i>
+                <span>Importar Maquinaria</span>
+            </a>
+        </div>
     </div>
+
     {% empty %}
     <div class="empty-state empty-state-card">
         <div class="empty-icon empty-state-icon">🏢</div>
@@ -134,7 +146,7 @@
 <!-- Botón Agregar Empresa (Outline Neon Style) -->
 <div class="action-container">
     <a href="{% url 'root_create_empresa' %}" class="btn-outline-neon" title="Registrar Nueva Empresa">
-        <i class="icon">+</i> Registrar Equipo
+        <i class="icon">+</i> Registrar Nueva Empresa
     </a>
 </div>
 

@@ -8,6 +8,7 @@ urlpatterns = [
     path('login/', views.web_login, name='web_login'),
     path('logout/', views.web_logout, name='web_logout'),
     path('perfil/', views.mi_perfil, name='mi_perfil'),
+    path('cambiar-password/', views.cambiar_password_forzado, name='cambiar_password_forzado'),
     path('dashboard/', views.dashboard, name='dashboard'),
     
     # --- Auth: Recuperación de Contraseña ---
@@ -62,6 +63,10 @@ urlpatterns = [
     path('root/empresa/<int:empresa_id>/modulos/', views.root_edit_modules, name='root_edit_modules'),
     path('root/empresa/<int:empresa_id>/owner/', views.root_manage_owner, name='root_manage_owner'),
     path('root/empresa/<int:empresa_id>/toggle-status/', views.root_toggle_empresa_status, name='root_toggle_empresa_status'),
+    path('root/empresa/<int:empresa_id>/importar-usuarios/', views.root_import_usuarios, name='root_import_usuarios'),
+    path('root/empresa/<int:empresa_id>/bajar-plantilla/', views.root_download_plantilla_usuarios, name='root_download_plantilla_usuarios'),
+    path('root/empresa/<int:empresa_id>/importar-maquinas/', views.root_import_maquinarias, name='root_import_maquinarias'),
+    path('root/empresa/<int:empresa_id>/bajar-plantilla-maquinas/', views.root_download_plantilla_maquinarias, name='root_download_plantilla_maquinarias'),
     
     # --- Exportaciones CSV Genéricas ---
     path('exportar/csv/<str:tipo>/', views.exportar_csv, name='exportar_csv'),

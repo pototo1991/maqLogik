@@ -10,8 +10,8 @@ def exportar_csv(request, tipo):
     Controlador genérico para descargar datos en formato CSV (Compatible con Excel).
     Recibe un string 'tipo' que ruteará al queryset y cabeceras correctas.
     """
-    response = HttpResponse(content_type='text/csv')
-    response.charset = 'utf-8-sig' # BOM para que Excel lea los tildes automáticamente
+    response = HttpResponse(content_type='text/csv; charset=cp1252')
+    response.charset = 'cp1252' # Windows Latin-1: Excel en español lo interpreta directamente sin distorsionar tildes o ñ
     
     # Nombre de archivo dinámico
     fecha_hoy = timezone.now().strftime('%Y%m%d_%H%M')
@@ -21,8 +21,8 @@ def exportar_csv(request, tipo):
     
     # Ruteador de Entidades
     if tipo == 'maquinarias':
-        writer.writerow(['ID Interno', 'Patente', 'Tipo', 'Marca', 'Modelo', 'Estado', 'Sede'])
-        maquinas = Maquinaria.objects.filter(empresa=request.empresa).order_by('id_interno')
+        writer.writerow(['ID Interno', 'Patente', 'Tipo', 'Marca', 'Modelo', 'Estado', 'Combustible', 'U. Medida', 'Valor Actual'])
+        maquinas = Maquinaria.objects.filter(empresa=request.user.empresa).order_by('id_interno')
         for m in maquinas:
             writer.writerow([
                 m.id_interno,
@@ -31,18 +31,23 @@ def exportar_csv(request, tipo):
                 m.marca or '-',
                 m.modelo or '-',
                 m.get_estado_display(),
-                m.sede.nombre if m.sede else '-'
+                m.tipo_combustible,
+                m.get_unidad_medida_display(),
+                m.valor_actual_medida
             ])
 
     elif tipo == 'usuarios':
-        writer.writerow(['Username', 'Nombre Completo', 'Email', 'Rol', 'Activo'])
+        writer.writerow(['Usuario', 'Nombre Completo', 'RUT', 'Email', 'Teléfono', 'Rol', 'Valor Hora', 'Activo'])
         usuarios = Usuario.objects.filter(empresa=request.empresa).order_by('username')
         for u in usuarios:
             writer.writerow([
                 u.username,
-                u.get_full_name(),
-                u.email,
+                u.nombre_completo or u.get_full_name() or '-',
+                u.rut or '-',
+                u.email or '-',
+                u.telefono or '-',
                 u.get_rol_display(),
+                u.valor_hora,
                 'Sí' if u.is_active else 'No'
             ])
 

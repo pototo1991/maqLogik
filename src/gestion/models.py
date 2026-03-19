@@ -73,9 +73,15 @@ class Usuario(AbstractUser):
     estado = models.CharField(max_length=20, choices=ESTADOS, default='DISPONIBLE')
     valor_hora = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, null=True)
+    debe_cambiar_password = models.BooleanField(default=False, help_text='Si True, el usuario será redirigido a cambiar su contraseña al iniciar sesión.')
     
     # Manager para Multi-Tenancy pero preservando lógica de Auto-Usuario
     objects = UsuarioManager()
+
+    def __str__(self):
+        if self.nombre_completo:
+            return f"{self.nombre_completo} - {self.rut}"
+        return self.rut
 
 # 3. MAQUINARIA
 class Maquinaria(models.Model):

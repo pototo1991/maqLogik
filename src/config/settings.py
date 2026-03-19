@@ -32,9 +32,17 @@ SECRET_KEY = 'django-insecure-$g-g9178uz+)@b!8$1#u43pt)fpvqr6%%c62erth1-7=2*#7^)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# Leemos ALLOWED_HOSTS del archivo .env separando por comas. Si no existe, usamos localhost por defecto.
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1', '*'])
+# Única definición de ALLOWED_HOSTS
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['maqlogik.cl', 'www.maqlogik.cl', 'localhost', '127.0.0.1', '100.76.68.126'])
 
+# Configuración de Orígenes de Confianza para CSRF (Esto arregla el error 403)
+CSRF_TRUSTED_ORIGINS = [
+    'https://maqlogik.cl',
+    'https://www.maqlogik.cl',
+]
+
+# Dile a Django que confíe en el protocolo HTTPS que le envía Cloudflare
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition
 

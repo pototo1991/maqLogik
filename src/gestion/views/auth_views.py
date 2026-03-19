@@ -16,10 +16,10 @@ def web_login(request):
         return redirect('dashboard')
         
     if request.method == 'POST':
-        rut_usuario = request.POST.get('username')
+        nombre_usuario = request.POST.get('username')
         clave = request.POST.get('password')
         
-        user = authenticate(request, username=rut_usuario, password=clave)
+        user = authenticate(request, username=nombre_usuario, password=clave)
         if user is not None:
             # Validación de Módulos vs Rol del Usuario
             if not user.is_superuser and user.empresa:
@@ -36,13 +36,17 @@ def web_login(request):
             login(request, user)
             logger.info(f"AUDITORÍA - Login Web Exitoso: Usuario '{user.username}' ({user.get_rol_display()}) de la empresa '{user.empresa.nombre_fantasia if user.empresa else 'System Admin'}'.")
             
+            # Si el usuario debe cambiar su contraseña (importado masivamente), redirigir primero
+            if getattr(user, 'debe_cambiar_password', False):
+                return redirect('cambiar_password_forzado')
+            
             # Redirección inteligente basada en rol
             if user.is_superuser:
                 return redirect('root_dashboard')
             else:
                 return redirect('dashboard')
         else:
-            logger.warning(f"AUDITORÍA - Intento fallido de Login Web: Credenciales inválidas para el rut: '{rut_usuario}'. IP: {request.META.get('REMOTE_ADDR')}")
+            logger.warning(f"AUDITORÍA - Intento fallido de Login Web: Credenciales inválidas para el usuario: '{nombre_usuario}'. IP: {request.META.get('REMOTE_ADDR')}")
             messages.error(request, 'Usuario o contraseña incorrectos.')
             
     return render(request, 'gestion/auth/login.html')
@@ -83,3 +87,34 @@ def mi_perfil(request):
     
     return render(request, 'gestion/auth/mi_perfil.html', {'form': form})
 
+
+@login_required
+def cambiar_password_forzado(request):
+    """
+    Vista que se muestra cuando un usuario importado masivamente inicia sesión por primera vez.
+    Le obliga a definir una nueva contraseña antes de poder usar el sistema.
+    """
+    # Si ya cambió su contraseña, no debería estar aquí
+    if not request.user.debe_cambiar_password:
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        nueva_password = request.POST.get('nueva_password')
+        confirmar_password = request.POST.get('confirmar_password')
+
+        if not nueva_password or len(nueva_password) < 8:
+            messages.error(request, 'La contraseña debe tener al menos 8 caracteres.')
+        elif nueva_password != confirmar_password:
+            messages.error(request, 'Las contraseñas no coinciden.')
+        else:
+            request.user.set_password(nueva_password)
+            request.user.debe_cambiar_password = False
+            request.user.save()
+            # Django desloguea al usuario al cambiar contraseña, hay que re-autenticarlo
+            from django.contrib.auth import update_session_auth_hash
+            update_session_auth_hash(request, request.user)
+            logger.info(f"AUDITORÍA - Usuario '{request.user.username}' estableció su nueva contraseña (primer acceso).")
+            messages.success(request, '🔐 ¡Contraseña actualizada! Ahora puedes usar el sistema normalmente.')
+            return redirect('dashboard')
+
+    return render(request, 'gestion/auth/cambiar_password_forzado.html')

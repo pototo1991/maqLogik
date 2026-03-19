@@ -76,6 +76,36 @@
     background: rgba(0, 230, 118, 0.05);
 }
 
+/* Password Toggle Styles */
+.password-field-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-field-wrapper input {
+    padding-right: 45px; /* Dejar espacio para el icono */
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    transition: color 0.3s ease;
+}
+
+.toggle-password:hover {
+    color: var(--color-brand);
+}
+
 .login-options {
     display: flex;
     justify-content: space-between;

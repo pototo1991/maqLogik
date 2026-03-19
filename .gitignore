@@ -176,3 +176,20 @@ src/app_control.log
 docker-data/
 db_data/
 *.log
+
+# Archivos de la IA y Agentes Locales
+.agents/
+.gemini/
+.antigravity/
+output.txt
+*.resolved
+
+# Archivos estáticos y multimedia generados por Django
+src/staticfiles/
+src/media/
+src/static_root/
+src/media_root/
+
+# Logs de la aplicación móvil (Flutter/Dart)
+app_movil/*.txt
+app_movil/*.log

@@ -1,20 +1,24 @@
 :root {
-    /* Colores Base Web app (Oscuros / Sobrios) */
-    --bg-base: #050505; 
-    --bg-surface: #111116;
-    --glass-bg: rgba(20, 20, 25, 0.6);
-    --glass-border: rgba(255, 255, 255, 0.05);
+    /* --- Variables de Color (Inspiradas en image_0.png) --- */
+    /* Colores Base Web app (Oscuros / Sobrios Elevados) */
+    --bg-base: #050505; /* Negro Profundo */
+    --bg-surface: #0c0e12; /* Gris-Azulado muy oscuro para sofisticación */
+    --glass-bg: rgba(12, 14, 18, 0.7); /* Vidrio elevado */
+    --glass-border: rgba(255, 255, 255, 0.08); /* Borde más nítido */
     
-    /* Neones (Dinamismo y Juvenil) */
+    /* Neón de Acento (Del login en image_0.png) */
+    --neon-green: #00f260; /* Verde neón vibrante y exacto */
+    --neon-green-shadow: rgba(0, 242, 96, 0.5); /* Sombra de resplandor neón */
+    
+    /* Paleta complementaria sutil para los módulos */
     --neon-blue: #00f2fe;
-    --neon-blue-dark: #4facfe;
-    --neon-green: #00f260;
     --neon-purple: #b300ff;
     
-    --text-main: #ffffff;
-    --text-muted: #9ca3af; /* Gris claro/plateado para contraste en fondo negro */
+    --text-main: #ffffff; /* Blanco Nítido */
+    --text-muted: #9ca3af; /* Gris plateado para contraste */
 }
 
+/* --- Utilidades --- */
 .text-muted {
     color: var(--text-muted) !important;
 }
@@ -26,7 +30,7 @@ body {
     margin: 0;
     padding: 0;
     overflow-x: hidden;
-    /* Patrón de puntos tecnológicos sutil */
+    /* Efecto de fondo de patrón tecnológico sutil */
     background-image: 
         radial-gradient(var(--glass-border) 1px, transparent 1px);
     background-size: 30px 30px;
@@ -37,13 +41,13 @@ h1, h2, h3, h4, .brand-font {
     font-family: 'Outfit', sans-serif;
 }
 
-/* Nav Glassmorphism Premium */
+/* --- Barra de Navegación (Glassmorphism Elevado) --- */
 .navbar-glass {
-    background: rgba(5, 5, 5, 0.85);
+    background: var(--glass-bg);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border-bottom: 1px solid var(--glass-border);
-    padding: 1.2rem 2rem;
+    padding: 1rem 2rem;
     position: fixed;
     width: 100%;
     top: 0;
@@ -51,6 +55,7 @@ h1, h2, h3, h4, .brand-font {
     transition: all 0.4s ease;
 }
 
+/* Logotipo con Icono en Degradado Verde Neón */
 .navbar-brand {
     font-weight: 800;
     font-size: 1.8rem;
@@ -62,17 +67,18 @@ h1, h2, h3, h4, .brand-font {
 }
 
 .navbar-brand i { 
-    background: linear-gradient(135deg, var(--neon-blue), var(--neon-blue-dark));
+    background: linear-gradient(135deg, var(--neon-green), #ffffff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     font-size: 2rem;
 }
 
+/* Botón de Portal (Outline) - Ahora en Verde */
 .btn-portal {
     background: transparent;
-    border: 1px solid var(--neon-blue);
-    color: var(--neon-blue) !important;
+    border: 1px solid var(--neon-green);
+    color: var(--neon-green) !important;
     border-radius: 8px;
     padding: 0.6rem 2rem;
     font-weight: 600;
@@ -83,14 +89,15 @@ h1, h2, h3, h4, .brand-font {
 }
 
 .btn-portal:hover {
-    background: var(--neon-blue);
+    background: var(--neon-green);
     color: #000 !important;
-    box-shadow: 0 0 20px rgba(0, 242, 254, 0.4);
+    box-shadow: 0 0 20px var(--neon-green-shadow);
     transform: translateY(-2px);
 }
 
+/* Botón Sólido con Resplandor Neón Vibrante (Inspirado en image_0.png) */
 .btn-solid-blue {
-    background: linear-gradient(135deg, var(--neon-blue-dark), var(--neon-blue));
+    background: linear-gradient(135deg, var(--neon-green), #00dd55);
     color: #000 !important;
     border: none;
     border-radius: 8px;
@@ -98,24 +105,24 @@ h1, h2, h3, h4, .brand-font {
     font-weight: 700;
     font-family: 'Outfit', sans-serif;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 242, 254, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 242, 96, 0.2);
 }
 
 .btn-solid-blue:hover {
-    box-shadow: 0 8px 25px rgba(0, 242, 254, 0.4);
+    box-shadow: 0 8px 30px var(--neon-green-shadow); /* Resplandor neón vibrante */
     transform: translateY(-3px);
 }
 
-/* Hero Section */
+/* --- Sección Hero (Título con degradado y Luz de Fondo) --- */
 .hero {
     min-height: 100vh;
     display: flex;
     align-items: center;
-    padding-top: 80px;
+    padding-top: 100px; /* Ajuste para navbar más alta */
     position: relative;
 }
 
-/* Luz de fondo abstracta */
+/* Luz de fondo abstracta en Verde Neón */
 .hero::before {
     content: '';
     position: absolute;
@@ -124,11 +131,12 @@ h1, h2, h3, h4, .brand-font {
     transform: translateX(-50%);
     width: 600px;
     height: 600px;
-    background: radial-gradient(circle, rgba(0, 242, 254, 0.15) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(0, 242, 96, 0.12) 0%, transparent 70%);
     z-index: -1;
     pointer-events: none;
 }
 
+/* Título con Degradado Moderno */
 .hero h1 {
     font-size: 4.5rem;
     font-weight: 900;
@@ -138,7 +146,7 @@ h1, h2, h3, h4, .brand-font {
 }
 
 .text-gradient {
-    background: linear-gradient(135deg, #ffffff 30%, var(--neon-blue) 100%);
+    background: linear-gradient(135deg, #ffffff 30%, var(--neon-green) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -152,7 +160,7 @@ h1, h2, h3, h4, .brand-font {
     max-width: 90%;
 }
 
-/* Floating elements in Hero */
+/* Elementos flotantes en Hero */
 .dashboard-img-container {
     position: relative;
     z-index: 10;
@@ -161,10 +169,10 @@ h1, h2, h3, h4, .brand-font {
 .dashboard-img {
     border-radius: 16px;
     border: 1px solid rgba(255,255,255,0.05);
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 40px rgba(0, 242, 254, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 40px rgba(0, 242, 96, 0.08);
 }
 
-/* Glass Cards (Módulos) */
+/* --- Sección de Módulos (Glass Cards) --- */
 .glass-card {
     background: var(--bg-surface);
     border: 1px solid var(--glass-border);
@@ -176,6 +184,7 @@ h1, h2, h3, h4, .brand-font {
     overflow: hidden;
 }
 
+/* Línea superior neón sutil */
 .glass-card::before {
     content: '';
     position: absolute;
@@ -183,15 +192,16 @@ h1, h2, h3, h4, .brand-font {
     left: 0;
     width: 100%;
     height: 2px;
-    background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+    background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
     opacity: 0;
     transition: opacity 0.4s ease;
 }
 
+/* Tarjeta de Vidrio (Glass Card) Elevada */
 .glass-card:hover {
     transform: translateY(-10px);
-    background: #15151a;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    background: #101216;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
     border-color: rgba(255,255,255,0.1);
 }
 
@@ -199,6 +209,7 @@ h1, h2, h3, h4, .brand-font {
     opacity: 1;
 }
 
+/* Icono de Características con Resplandor Sutil */
 .feature-icon {
     font-size: 2rem;
     margin-bottom: 1.5rem;
@@ -212,9 +223,10 @@ h1, h2, h3, h4, .brand-font {
     border: 1px solid var(--glass-border);
 }
 
-.icon-blue { color: var(--neon-blue); box-shadow: inset 0 0 20px rgba(0, 242, 254, 0.1); }
-.icon-green { color: var(--neon-green); box-shadow: inset 0 0 20px rgba(0, 242, 96, 0.1); }
-.icon-purple { color: var(--neon-purple); box-shadow: inset 0 0 20px rgba(179, 0, 255, 0.1); }
+/* Colores de Icono Específicos */
+.icon-neon-green { color: var(--neon-green); box-shadow: inset 0 0 20px rgba(0, 242, 96, 0.1); }
+.icon-neon-purple { color: var(--neon-purple); box-shadow: inset 0 0 20px rgba(179, 0, 255, 0.1); }
+.icon-neon-blue { color: var(--neon-blue); box-shadow: inset 0 0 20px rgba(0, 242, 254, 0.1); }
 
 .glass-card h4 {
     font-weight: 700;
@@ -229,9 +241,9 @@ h1, h2, h3, h4, .brand-font {
     margin: 0;
 }
 
-/* Banner CTA */
+/* --- Banner CTA (Llamado a la acción) --- */
 .cta-section {
-    background: linear-gradient(180deg, transparent, rgba(0, 242, 254, 0.03));
+    background: linear-gradient(180deg, transparent, rgba(0, 242, 96, 0.03));
     border-top: 1px solid var(--glass-border);
     border-bottom: 1px solid var(--glass-border);
     padding: 5rem 0;
@@ -244,7 +256,7 @@ h1, h2, h3, h4, .brand-font {
     border-top: 1px solid var(--glass-border);
 }
 
-/* Animaciones Personalizadas */
+/* --- Animaciones Personalizadas --- */
 .float-slow { animation: float-slow 6s ease-in-out infinite; }
 .float-fast { animation: float-fast 4s ease-in-out infinite; }
 

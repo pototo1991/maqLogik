@@ -1,0 +1,61 @@
+{% extends 'gestion/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; margin: 0 auto; padding-top: 40px;">
+    
+    <div class="p-glass" style="padding: 40px; border-radius: var(--radius-lg); text-align: center;">
+        <h2 style="color: var(--color-brand); margin-bottom: 10px;">
+            📥 Importación Masiva de Usuarios
+        </h2>
+        <p style="color: var(--color-text-muted); margin-bottom: 30px;">
+            Cargando empleados para la empresa: <strong>{{ empresa.nombre_fantasia }}</strong>
+        </p>
+
+        <!-- Paso 1: Descargar Plantilla -->
+        <div style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: var(--radius-md); margin-bottom: 30px; text-align: left;">
+            <h4 style="margin-bottom: 10px; color: white;">Paso 1: Preparar archivo Excel</h4>
+            <p style="color: var(--color-text-muted); font-size: 0.95rem;">Descarga nuestra plantilla oficial en formato Excel (.xlsx) y complétala respetando las cabeceras. Las contraseñas iniciales de todos los usuarios serán "12345" por defecto general.</p>
+            <a href="{% url 'root_download_plantilla_usuarios' empresa.id %}" class="btn-form-cancel" style="margin-top: 15px; width: auto; color: var(--color-brand); border-color: var(--color-brand);">
+                <i class="bi bi-download"></i> Descargar Plantilla .XLSX
+            </a>
+        </div>
+
+        <hr style="border-color: rgba(255,255,255,0.05); margin-bottom: 30px;">
+
+        <!-- Paso 2: Subir Archivo -->
+        <div style="text-align: left;">
+            <h4 style="margin-bottom: 15px; color: white;">Paso 2: Subir y Procesar</h4>
+            
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div style="border: 2px dashed rgba(255,255,255,0.2); border-radius: var(--radius-md); padding: 40px 20px; text-align: center; background: rgba(0,0,0,0.2); transition: all 0.3s;" id="drop-zone">
+                    <i class="bi bi-file-earmark-spreadsheet" style="font-size: 3rem; color: var(--color-brand); margin-bottom: 15px; display: block;"></i>
+                    <p style="color: white; margin-bottom: 15px;">Arrastra tu archivo Excel aquí o selecciona uno de tu equipo.</p>
+                    <input type="file" name="excel_file" accept=".xlsx" required id="csv_file" style="background: var(--glass-bg); color: white; border: 1px solid var(--glass-border); padding: 10px; border-radius: 5px; width: 100%; max-width: 400px; cursor: pointer;">
+                </div>
+                
+                <div class="form-actions-bar" style="margin-top: 25px;">
+                    <a href="{% url 'root_dashboard' %}" class="btn-form-cancel">Volver al Panel</a>
+                    <button type="submit" class="btn-form-save">
+                        <i class="bi bi-cloud-upload"></i> Ejecutar Importación
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Pequeño script para el efecto hover del drag & drop
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('csv_file');
+
+    fileInput.addEventListener('change', function() {
+        if(this.files.length > 0) {
+            dropZone.style.borderColor = 'var(--color-brand)';
+            dropZone.style.backgroundColor = 'rgba(0, 230, 118, 0.1)';
+        }
+    });
+</script>
+{% endblock %}

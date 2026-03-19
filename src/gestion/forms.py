@@ -85,8 +85,8 @@ class MaquinariaForm(forms.ModelForm):
             'id_interno': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: EX-01'}),
             'patente': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: ABCD12', 'pattern': '[A-Za-z0-9]{6}', 'title': 'Formato todo junto, Ej: ABCD12', 'maxlength': '6'}),
             'tipo': forms.Select(attrs={'class': 'form-input'}),
-            'marca': forms.TextInput(attrs={'class': 'form-input'}),
-            'modelo': forms.TextInput(attrs={'class': 'form-input'}),
+            'marca': forms.TextInput(attrs={'class': 'form-input', 'style': 'text-transform: uppercase;', 'placeholder': 'Ej: CATERPILLAR'}),
+            'modelo': forms.TextInput(attrs={'class': 'form-input', 'style': 'text-transform: uppercase;', 'placeholder': 'Ej: 320D'}),
             'tonelaje': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.1', 'placeholder': '(Indique en toneladas)'}),
             'tipo_combustible': forms.Select(choices=[('DIESEL', 'Diésel'), ('GASOLINA', 'Gasolina'), ('ELECTRICA', 'Eléctrica')], attrs={'class': 'form-input'}),
             'unidad_medida': forms.Select(attrs={'class': 'form-input'}),
@@ -105,6 +105,14 @@ class MaquinariaForm(forms.ModelForm):
             if not re.match(r'^[A-Z0-9]{6}$', patente):
                 raise forms.ValidationError('La patente debe tener el formato todo junto de 6 caracteres (Ej: ABCD12).')
         return patente
+
+    def clean_marca(self):
+        marca = self.cleaned_data.get('marca')
+        return marca.upper().strip() if marca else marca
+
+    def clean_modelo(self):
+        modelo = self.cleaned_data.get('modelo')
+        return modelo.upper().strip() if modelo else modelo
 
     def __init__(self, *args, **kwargs):
         empresa = kwargs.pop('empresa', None)
@@ -125,10 +133,10 @@ class UsuarioCreationForm(UserCreationForm):
         fields = ('username', 'rut', 'nombre_completo', 'email', 'telefono', 'valor_hora')
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: admin.empresa'}),
-            'rut': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: 12345678-9', 'pattern': '^[0-9]{7,8}-[0-9Kk]{1}$', 'title': 'Formato con guión: 12345678-9'}),
+            'rut': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: 12345678-9', 'pattern': '^[0-9]{1,2}\.?[0-9]{3}\.?[0-9]{3}-[0-9Kk]{1}$', 'title': 'Formato: 12345678-9 ó 12.345.678-9 (Con o sin puntos)'}),
             'nombre_completo': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Nombre completo (Nombres y Apellidos)'}),
             'email': forms.EmailInput(attrs={'class': 'form-input', 'placeholder': 'Correo electrónico'}),
-            'telefono': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: +56912345678', 'pattern': '^\\+56[0-9]{9}$', 'title': 'Debe comensar con +56 seguido de 9 dígitos', 'value': '+56'}),
+            'telefono': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: 912345678', 'pattern': '^(\\+56)?[0-9]{9}$', 'title': 'Ingrese 9 dígitos (ej: 912345678) o formato completo +56912345678'}),
             'rol': forms.Select(attrs={'class': 'form-input'}),
             'estado': forms.Select(attrs={'class': 'form-input'}),
             'valor_hora': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.1', 'placeholder': 'Valor por hora ($)'}),
@@ -150,9 +158,20 @@ class UsuarioCreationForm(UserCreationForm):
     def clean_rut(self):
         rut = self.cleaned_data.get('rut')
         if rut:
+            # Normalizar: quitar puntos antes de validar y guardar en BD
+            rut = rut.replace('.', '').strip()
             if not validar_rut_chileno(rut):
                 raise forms.ValidationError('El RUT de usuario ingresado no es válido matemáticamente (Dígito Verificador incorrecto).')
         return rut
+
+    def clean_telefono(self):
+        telefono = self.cleaned_data.get('telefono')
+        if telefono:
+            telefono = telefono.replace(" ", "").strip()
+            # Si solo vienen 9 dígitos y empieza con 9, normalizamos a +56
+            if len(telefono) == 9 and telefono.startswith('9'):
+                telefono = f"+56{telefono}"
+        return telefono
 
 class UsuarioUpdateForm(forms.ModelForm):
     class Meta:
