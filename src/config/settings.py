@@ -36,12 +36,16 @@ DEBUG = True
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['maqlogik.cl', 'www.maqlogik.cl', 'localhost', '127.0.0.1', '100.76.68.126'])
 
 # Configuración de Orígenes de Confianza para CSRF (Esto arregla el error 403)
+
+# 2. Configuración de Orígenes de Confianza para CSRF (Esto arregla el error 403)
 CSRF_TRUSTED_ORIGINS = [
     'https://maqlogik.cl',
     'https://www.maqlogik.cl',
 ]
 
 # Dile a Django que confíe en el protocolo HTTPS que le envía Cloudflare
+
+# 3. Dile a Django que confíe en el protocolo HTTPS que le envía Cloudflare
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition

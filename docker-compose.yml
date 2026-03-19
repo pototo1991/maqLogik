@@ -6,7 +6,7 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE: maqlogik_db
-      MYSQL_ROOT_PASSWORD: password_secreto
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}  # <--- Ahora lee automáticamente del archivo .env
     ports:
       - "3307:3306"
     volumes:
@@ -33,6 +33,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    networks:
+      - default
+      - cloudflare_net
 
   redis:
     image: redis:7-alpine
@@ -70,3 +73,7 @@ services:
 
 volumes:
   db_data:
+
+networks:
+  cloudflare_net:
+    external: true
